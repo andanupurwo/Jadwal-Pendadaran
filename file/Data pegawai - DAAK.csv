@@ -1,0 +1,529 @@
+﻿No;Nik;Status (Dosen/Tendik);Nama;Kategori Dosen/Karyawan;NIDN;Jenis Kelamin
+1;190302001;DOSEN;Prof. Dr. Mohammad Suyanto, M.M.;Dosen Karyawan;0520026001;L
+2;190302004;DOSEN;Dr. Drs. Muhamad Idris Purwanto, M.M.;Dosen Tetap Khusus;0503066001;L
+3;190302011;DOSEN;Ir. Rum Mohamad Andri K Rasyid, M.Kom.;Dosen Karyawan;0521076702;L
+4;190302012;DOSEN;Agung Pambudi, S.T., M.A.;Dosen Karyawan;0512126503;L
+5;190302013;DOSEN;Rahma Widyawati, S.E., M.M.;Dosen Karyawan;0522026702;P
+6;190302017;DOSEN;Eny Nurnilawati, S.E., M.M.;Dosen Karyawan;0519057102;P
+7;190302019;DOSEN;Suyatmi, S.E., M.M.;Dosen Karyawan;0531127101;P
+8;190302021;DOSEN;Istiningsih, S.E., M.M.;Dosen Karyawan;0521076901;P
+9;190302022;DOSEN;Dr. Achmad Fauzi, S.E., M.M.;Dosen Karyawan;0514106702;L
+10;190302023;TENDIK;Jumadi;Karyawan Tetap;;L
+11;190302024;DOSEN;Hanafi, S.Kom., M.Eng., Ph.D.;Dosen Karyawan;0519127303;L
+12;190302027;DOSEN;Widiyanti Kurnianingsih, S.E., M.Ak.;Dosen Karyawan;0503086601;P
+13;190302029;DOSEN;Drs. Bambang Sudaryatno, M.M.;Dosen Freelance;0505096001;L
+14;190302031;DOSEN;Aryanto Yuniawan, S.Kom., M.Kom.;Dosen Karyawan;0518067701;L
+15;190302035;DOSEN;Sudarmawan, S.T., M.T.;Dosen Karyawan;0512047201;L
+16;190302036;DOSEN;Prof. Arief Setyanto, S.Si., M.T., Ph.D.;Dosen Karyawan;0522077501;L
+17;190302037;DOSEN;Prof. Dr. Ema Utami, S.Si., M.Kom.;Dosen Karyawan;0521027501;P
+18;190302038;DOSEN;Krisnawati, S.Si., M.T.;Dosen Karyawan;0505057501;P
+19;190302039;DOSEN;Yudi Sutanto, S.Kom., M.Kom.;Dosen Karyawan;0505077501;L
+20;190302040;TENDIK;Rachmad Agung S, A.Md.;Karyawan Tetap;;L
+21;190302041;DOSEN;Anik Sri Widawati, S.Sos., M.M.;Dosen Karyawan;0515077302;P
+22;190302042;DOSEN;Mei Maemunah, S.H., M.M.;Dosen Karyawan;0508057401;P
+23;190302044;TENDIK;Wantorohadi;Karyawan Tetap;;L
+24;190302046;TENDIK;Raharjanto Atmaji, S.Kom., M.M.;Karyawan Tetap;;L
+25;190302047;DOSEN;Amir Fatah Sofyan, S.T., M.Kom.;Dosen Karyawan;0519076901;L
+26;190302049;TENDIK;Sumarna, S.E.;Karyawan Tetap;;L
+27;190302051;TENDIK;Sarjiyono, S.Kom.;Karyawan Tetap;;L
+28;190302052;DOSEN;Dr. Andi Sunyoto, S.Kom., M.Kom.;Dosen Karyawan;0507027701;L
+29;190302053;TENDIK;Sunaribowo, S.E.;Karyawan Tetap;;L
+30;190302057;DOSEN;Heri Sismoro, S.Kom., M.Kom.;Dosen Karyawan;0523057401;L
+31;190302060;DOSEN;Dr. Sri Ngudi Wahyuni, S.T., M.Kom.;Dosen Karyawan;0511127701;P
+32;190302061;TENDIK;Lya Renyta Ika Puteri, S.Kom.;Karyawan Tetap;0522127801;P
+33;190302062;TENDIK;Murni Elviana Dewi, S.Kom.;Karyawan Tetap;;P
+34;190302065;TENDIK;Junaidi, S.M.;Karyawan Tetap;;L
+35;190302066;DOSEN;Nur Aini, A.Md., S.Kom., M.Kom.;Dosen Karyawan;0520067901;P
+36;190302068;DOSEN;Jaeni , S.Kom., M.Eng.;Dosen Karyawan;0523077601;L
+37;190302096;DOSEN;Hanif Al Fatta, S.Kom., M.Kom., Ph.D.;Dosen Karyawan;0517027901;L
+38;190302098;DOSEN;Muhammad Rudyanto Arief, S.T., M.T;Dosen Karyawan;0518037801;L
+39;190302099;TENDIK;Retlius;Karyawan Tetap;;L
+40;190302100;TENDIK;Sigit Priyanto;Karyawan Tetap;;L
+41;190302101;TENDIK;Dwi Susanto;Karyawan Tetap;;L
+42;190302102;TENDIK;Supranta;Karyawan Tetap;;L
+43;190302103;TENDIK;Purwadi;Karyawan Tetap;;L
+44;190302105;DOSEN;Melwin Syafrizal, S.Kom., M.Eng., Ph.D.;Dosen Karyawan;0511057202;L
+45;190302106;DOSEN;Prof. Dr. Kusrini, S.Kom., M.Kom.;Dosen Karyawan;0513127901;P
+46;190302107;DOSEN;Erik Hadi Saputra, S.Kom., M.Eng.;Dosen Karyawan;0501117801;L
+47;190302108;DOSEN;Mardhiya Hayaty, S.T., M.Kom.;Dosen Tetap Fulltime;0527077801;P
+48;190302109;DOSEN;Andika Agus Slameto, S.Kom., M.Kom.;Dosen Karyawan;0522088001;L
+49;190302110;DOSEN;Tristanto Ariaji, S.Kom., M.Kom.;Dosen Karyawan;0507048001;L
+50;190302111;TENDIK;Fatkhurrohman Akhmad, A.Md.;Karyawan Tetap;;L
+51;190302112;DOSEN;Kusnawi, S.Kom., M.Eng.;Dosen Karyawan;0528097501;L
+52;190302114;TENDIK;Tutut Heryanti, S.Kom.;Karyawan Tetap;;P
+53;190302115;DOSEN;Tri Susanto, M.Kom;Dosen Tetap Khusus;0526077801;L
+54;190302117;TENDIK;M. Piko Henry Widiarto, S.Kom.;Karyawan Tetap;;L
+55;190302118;TENDIK;Sumarjono, S.Kom.;Karyawan Tetap;;L
+56;190302120;TENDIK;Fitri Ismuharyanti, A.Md.;Karyawan Tetap;;P
+57;190302122;TENDIK;Adi Kurniawan, S.Kom.;Karyawan Tetap;;L
+58;190302123;TENDIK;Paryanto;Karyawan Tetap;;L
+59;190302124;TENDIK;Sunarno, A.Md., S.M.;Karyawan Tetap;;L
+60;190302125;DOSEN;Emha Taufiq Luthfi, S.T., M.Kom., Ph.D.;Dosen Karyawan;0524067901;L
+61;190302126;DOSEN;Barka Satya, S.Kom., M.Kom.;Dosen Karyawan;0505067902;L
+62;190302128;DOSEN;Dr. Dony Ariyus, S.S., M.Kom.;Dosen Karyawan;0524037901;L
+63;190302146;DOSEN;Yuli Astuti, S.Kom., M.Kom.;Dosen Karyawan;0521018302;P
+64;190302148;DOSEN;Ahlihi Masruro, S.Kom., M.Kom.;Dosen Tetap Fulltime;0519067602;L
+65;190302150;DOSEN;Arif Dwi Laksito, S.Kom., M.Kom.;Dosen Karyawan;0529098202;L
+66;190302151;DOSEN;Lukman, S.Kom., M.Kom.;Dosen Karyawan;0505128101;L
+67;190302152;DOSEN;Drs. Asro Nasiri, M.Kom.;Dosen Karyawan;0407106704;L
+68;190302154;DOSEN;Devi Wulandari, S.Kom., M.Kom.;Dosen Karyawan;0526078501;P
+69;190302155;TENDIK;Diah Astuti, S.E., M.Ak.;Karyawan Tetap;;P
+70;190302156;DOSEN;Tahajudin Sudibyo, Drs. M.A;Dosen Tetap Khusus;9990643154;L
+71;190302157;TENDIK;Suparwoto, A.Md.;Karyawan Tetap;;L
+72;190302159;DOSEN;Kamarudin, S.Kom., M.Kom.;Dosen Karyawan;0525038203;L
+73;190302160;TENDIK;Puji Ariningsih, S.E., M.Kom.;Karyawan Tetap;;P
+74;190302161;DOSEN;Nila Feby Puspitasari, S.Kom., M.Cs.;Dosen Tetap Fulltime;0510118101;P
+75;190302162;TENDIK;Ruri Kuntoro, S.Kom.;Karyawan Tetap;;L
+76;190302163;DOSEN;Anggit Dwi Hartanto, S.Kom., M.Kom.;Dosen Karyawan;0513098601;L
+77;190302164;DOSEN;Bhanu Sri Nugraha, S.Kom., M.Kom.;Dosen Karyawan;0530048001;L
+78;190302174;DOSEN;Akhmad Dahlan , S.Kom., M.Kom.;Dosen Tetap Fulltime;0514078401;L
+79;190302181;DOSEN;Joko Dwi Santoso, S.Kom., M.Kom.;Dosen Tetap Fulltime;0511038302;L
+80;190302182;DOSEN;Tonny Hidayat, S.Kom., M.Kom., Ph.D.;Dosen Karyawan;0524088501;L
+81;190302185;DOSEN;Windha Mega Pradnya Dhuhita, S.Kom., M.Kom.;Dosen Karyawan;0517038501;P
+82;190302187;DOSEN;Mei Parwanto Kurniawan, S.Kom., M.Kom.;Dosen Karyawan;0512058501;L
+83;190302192;DOSEN;Ali Mustopa, S.Kom., M.Kom.;Dosen Tetap Fulltime;0512108501;L
+84;190302197;DOSEN;Dhani Ariatmanto, S.Kom., M.Kom., Ph.D.;Dosen Tetap Fulltime;0527028001;L
+85;190302202;TENDIK;Hajam Masruri;Karyawan Tetap;;L
+86;190302203;TENDIK;Anom Windiarto, A.Md.;Karyawan Tetap;;L
+87;190302205;TENDIK;Fadya Rizka Yudana, S.Kom., M.Kom.;Karyawan Tetap;;L
+88;190302208;DOSEN;Raditya Wardhana, S.Kom., M.Kom.;Dosen Karyawan;0527078603;L
+89;190302209;DOSEN;Azis Catur Laksono, S.Kom., M.Kom.;Dosen Karyawan;0519018701;L
+90;190302211;TENDIK;Arif Sudharno Putro, S.I.P., M.I.P.;Karyawan Tetap;;L
+91;190302212;TENDIK;Anggit Mulat Saktiwi, S.I.P.;Karyawan Tetap;;P
+92;190302215;DOSEN;Rizqi Sukma Kharisma, S.Kom., M.Kom.;Dosen Karyawan;0511068701;L
+93;190302216;DOSEN;Bayu Setiaji, M.Kom.;Dosen Tetap Fulltime;0526048401;L
+94;190302218;TENDIK;Puguh Hasta Gunawan, S.Kom.;Karyawan Tetap;;L
+95;190302219;TENDIK;Bram Pratowo, S.Kom.;Karyawan Tetap;;L
+96;190302220;TENDIK;Palupi Indriani, S.Kom.;Karyawan Tetap;;P
+97;190302221;TENDIK;Dewi Pratiwi Wahyuningsih, S.Kom.;Karyawan Tetap;;P
+98;190302222;TENDIK;Ridwan Wahyudi, S.M.;Karyawan Tetap;;L
+99;190302225;TENDIK;Bangun Prastowo, S.Kom.;Karyawan Tetap;;L
+100;190302226;DOSEN;Dr. Emigawaty, M.Kom;Dosen Tetap Khusus;0206087501;P
+101;190302227;DOSEN;Eli Pujastuti, S.Kom., M.Kom.;Dosen Karyawan;0524078901;P
+102;190302228;DOSEN;Robert Marco, S.T., M.T., Ph.D.;Dosen Karyawan;0510048202;L
+103;190302229;DOSEN;Agus Purwanto, A.Md., S.Kom., M.Kom.;Dosen Karyawan;0618118002;L
+104;190302230;DOSEN;Hastari Utama, S.Kom., M.Cs.;Dosen Karyawan;0520058701;L
+105;190302231;DOSEN;Erni Seniwati, S.Kom, M.Cs;Dosen Tetap Khusus;0109118101;P
+106;190302232;DOSEN;Dr. Hartatik, S.T., M.Cs.;Dosen Tetap Fulltime;0506018401;P
+107;190302235;DOSEN;Dr. Ferry Wahyu Wibowo, S.Si., M.Cs.;Dosen Karyawan;0521058101;L
+108;190302236;DOSEN;Dwi Nurani, S.Kom., M.Kom.;Dosen Karyawan;0519088901;P
+109;190302237;DOSEN;Ike Verawati, S.Kom., M.Kom.;Dosen Karyawan;0512118802;P
+110;190302238;DOSEN;Acihmah Sidauruk, S.Kom., M.Kom.;Dosen Karyawan;0505078701;P
+111;190302239;DOSEN;Supriatin, A.Md., S.Kom., M.Kom.;Dosen Tetap Fulltime;0515108801;P
+112;190302240;DOSEN;Alfie Nur Rahmi, S.Kom., M.Kom.;Dosen Karyawan;0522088801;P
+113;190302242;DOSEN;Agung Nugroho, S.Kom., M.Kom.;Dosen Tetap Fulltime;0524088801;L
+114;190302243;DOSEN;Bernadhed, S.Kom., M.Kom.;Dosen Karyawan;0514028702;L
+115;190302244;DOSEN;Hendra Kurniawan, S.Kom., M.Kom.;Dosen Tetap Fulltime;0529108901;L
+116;190302245;DOSEN;Norhikmah, S.Kom., M.Kom.;Dosen Karyawan;0512108901;P
+117;190302246;DOSEN;Rumini, S.Kom., M.Kom.;Dosen Karyawan;0521058702;P
+118;190302248;DOSEN;Mulia Sulistiyono, S.Kom., M.Kom.;Dosen Karyawan;0525118601;L
+119;190302249;DOSEN;Agus Fatkhurohman, S.Kom., M.Kom.;Dosen Karyawan;0519088902;L
+120;190302250;DOSEN;Dina Maulina, S.Kom., M.Kom.;Dosen Karyawan;0517018201;P
+121;190302251;DOSEN;Satya Abdul Halim Bahtiar, S.Kom., M.Kom.;Dosen Karyawan;;L
+122;190302253;DOSEN;Donni Prabowo, S.Kom., M.Kom.;Dosen Karyawan;0518128901;L
+123;190302254;DOSEN;Bety Wulan Sari, S.Kom., M.Kom.;Dosen Tetap Fulltime;0507019201;P
+124;190302255;DOSEN;Ainul Yaqin, S.Kom., M.Kom.;Dosen Karyawan;0511119001;L
+125;190302256;DOSEN;Sumarni Adi, S.Kom., M.Cs.;Dosen Karyawan;0512068602;P
+126;190302257;DOSEN;Netci Hesvindrati, SE, M.Kom;Dosen Tetap Khusus;0517097901;P
+127;190302258;DOSEN;Wiji Nurastuti, S.E., M.T.;Dosen Tetap Khusus;0520067801;P
+128;190302259;DOSEN;Achmad Fauzan., Dr., S.Psi., M.Psi., MM;Dosen Tetap Khusus;0523116702;L
+129;190302260;DOSEN;Sri Mulyatun, Dra.,M.M;Dosen Tetap Khusus;0513027201;P
+130;190302265;TENDIK;Yusnia Andra Puspitaloka, A.Md., S.Kom.;Karyawan Tetap;;P
+131;190302266;DOSEN;Rosyidah Jayanti Vijaya, S.E, M.Hum;Dosen Tetap Khusus;0520097202;P
+132;190302268;DOSEN;Ika Nur Fajri, S.Kom., M.Kom.;Dosen Karyawan;0525058602;L
+133;190302270;DOSEN;Andriyan Dwi Putra, S.Kom., M.Kom.;Dosen Karyawan;0526079001;L
+134;190302271;DOSEN;Yogi Piskonata, S.S, M.Kom;;0517036801;L
+135;190302272;DOSEN;Wiwi Widayani, S.Kom., M.Kom.;Dosen Karyawan;0619028301;P
+136;190302274;TENDIK;Fatchurrohman Abdullah, S.Kom.;Karyawan Tetap;;L
+137;190302275;TENDIK;Nuzumul Layly, S.Kom.;Karyawan Tetap;;P
+138;190302276;DOSEN;Ferian Fauzi Abdulloh, S.Kom., M.Kom.;Dosen Karyawan;0511029001;L
+139;190302277;DOSEN;Rokhmatullah Batik Firmansyah, S.Kom., M.Kom.;Dosen Tetap Fulltime;0522089001;L
+140;190302278;DOSEN;Nuri Cahyono, M.Kom.;Dosen Karyawan;0513039101;L
+141;190302281;DOSEN;Muhammad Tofa Nurcholis, S.Kom., M.Kom.;Dosen Tetap Fulltime;0526078901;L
+142;190302282;DOSEN;Ikmah, S.Kom., M.Kom.;Dosen Karyawan;0515019201;P
+143;190302283;TENDIK;Budi Susanto, S.Kom.;Karyawan Tetap;;L
+144;190302284;DOSEN;Moch Farid Fauzi, S.Kom., M.Kom.;Dosen Karyawan;0501088701;L
+145;190302285;DOSEN;Sharazita Dyah Anggita, S.Kom., M.Kom.;Dosen Karyawan;0526118801;P
+146;190302286;DOSEN;Haryoko, S.Kom., M.Cs.;Dosen Karyawan;0510038602;L
+147;190302287;DOSEN;Arif Akbarul Huda, S.Si., M.Eng.;Dosen Karyawan;0506058901;L
+148;190302288;DOSEN;Lilis Dwi Farida, S.Kom., M.Eng.;Dosen Karyawan;0503088602;P
+149;190302289;DOSEN;Arifiyanto Hadinegoro, S.Kom., M.T.;Dosen Karyawan;0513018701;L
+150;190302290;DOSEN;Anna Baita, S.Kom., M.Kom.;Dosen Karyawan;0517098801;P
+151;190302291;DOSEN;Ahmad Sumiyanto, SE, M.Si;;0508067002;L
+152;190302292;DOSEN;Rr. Sophia Ratna Haryati, S.T., M.Sc.;Dosen Tetap Fulltime;0525058303;P
+153;190302293;DOSEN;Dr. Ismadiyanti Purwaning Astuti, S.E., M.Sc.;Dosen Tetap Fulltime;0514088601;P
+154;190302294;DOSEN;Yoga Suharman, S.IP., M.A.;Dosen Tetap Fulltime;0518108502;L
+155;190302295;DOSEN;Fahrul Imam Santoso, S.E., M.Akt.;Dosen Karyawan;0517058801;L
+156;190302297;DOSEN;Afrinia Lisditya Permatasari, S.Si., M.Sc.;Dosen Tetap Fulltime;0501058604;P
+157;190302298;DOSEN;Vidyana Arsanti, S.Si., M.Sc.;Dosen Tetap Fulltime;0502058604;P
+158;190302299;DOSEN;Fitria Nucifera, S.Si., M.Sc.;Dosen Karyawan;0529049002;P
+159;190302300;DOSEN;Dr. Ika Afianita Suherningtyas, S.Si., M.Sc.;Dosen Tetap Fulltime;0502018902;P
+160;190302301;DOSEN;Prasetyo Febriarto, S.T., M.Sc.;Dosen Tetap Fulltime;0506028402;L
+161;190302302;DOSEN;Sadewa Purba Sejati, S.Si., M.Sc.;Dosen Tetap Fulltime;0525018702;L
+162;190302303;DOSEN;Tanti Prita Hapsari, S.E., M.Si;Dosen Tetap Fulltime;0518058302;P
+163;190302304;DOSEN;Ardiyati, S.I.P., M.P.A;Dosen Tetap Fulltime;0525078101;P
+164;190302305;DOSEN;Seftina Kuswardini, S.IP., M.A.;Dosen Karyawan;0506088801;P
+165;190302307;DOSEN;Anggrismono, S.E., M.Ec.Dev.;Dosen Tetap Fulltime;0524028101;L
+166;190302308;DOSEN;Yusuf Amri Amrullah, S.E., M.M.;Dosen Tetap Fulltime;0518048702;L
+167;190302309;DOSEN;Rhisa Aidilla Suprapto, S.T., M.Sc.;Dosen Tetap Fulltime;0520108602;P
+168;190302310;DOSEN;Septi Kurniawati Nurhadi, S.T., M.T.;Dosen Tetap Fulltime;0504099001;P
+169;190302311;DOSEN;Rizky, S.Kom., M.Kom.;Dosen Tetap Fulltime;0529098803;L
+170;190302312;DOSEN;Senie Destya, S.T., M.Kom.;Dosen Tetap Fulltime;0524129001;P
+171;190302315;DOSEN;Firman Asharudin, S.Kom., M.Kom.;Dosen Tetap Fulltime;0527039002;L
+172;190302316;DOSEN;Hanantyo Sri Nugroho, S.IP., M.A.;Dosen Tetap Fulltime;0509048902;L
+173;190302317;DOSEN;Bagus Ramadhan, S.T., M.Eng.;Dosen Karyawan;0517049002;L
+174;190302318;DOSEN;Muhammad Zuhdan, S.I.P., M.A.;Dosen Tetap Fulltime;0511048201;L
+175;190302319;DOSEN;Rivga Agusta, S.I.P., M.A.;Dosen Karyawan;0518089102;L
+176;190302320;DOSEN;Fitria Nuraini Sekarsih, S.Si, M.Sc;Dosen Tetap Khusus;0510038603;P
+177;190302321;DOSEN;Ferri Wicaksono, S.I.P., M.A.;Dosen Karyawan;0531108802;L
+178;190302322;DOSEN;Khoirunnisa Cahya Firdani, SE, M.Si;;;P
+179;190302323;DOSEN;Rezki Satris, S.I.P., M.A.;Dosen Tetap Fulltime;0528048801;L
+180;190302324;DOSEN;Nurizka Fidali, S.T., M.Sc.;Dosen Tetap Fulltime;0502058003;L
+181;190302326;DOSEN;Agustina Rahmawati, S.A.P., M.Si.;Dosen Tetap Fulltime;0621089101;P
+182;190302327;DOSEN;Banu Santoso, A.Md., S.T., M.Eng.;Dosen Tetap Fulltime;0506017801;L
+183;190302328;DOSEN;Wahyu Sukestyastama Putra, S.T., M.Eng.;Dosen Tetap Fulltime;0511069101;L
+184;190302329;DOSEN;Irma Rofni Wulandari, S.Pd., M.Eng.;Dosen Tetap Fulltime;0515039001;P
+185;190302330;DOSEN;Ninik Tri Hartanti, S.Kom., M.Kom.;Dosen Tetap Fulltime;0505067901;P
+186;190302332;DOSEN;Muhammad Fairul Filza, S.Kom., M.Kom.;Dosen Tetap Fulltime;0504098603;L
+187;190302333;DOSEN;Fitri Juniwati Ayuningtyas, S.E., M.Ec.Dev.;Dosen Karyawan;0522058503;P
+188;190302334;DOSEN;Laksmindra Saptyawati, S.E., M.B.A.;Dosen Karyawan;0505038101;P
+189;190302335;DOSEN;Rina Pramitasari, S.Si., M.Cs.;Dosen Tetap Fulltime;0525068601;P
+190;190302338;DOSEN;Widiyana Riasasi, S.Si., M.Sc.;Dosen Tetap Fulltime;0520018901;P
+191;190302339;DOSEN;Angga Intueri Mahendra Purbakusuma, S.Sos., M.I.Kom.;Dosen Tetap Fulltime;1015018501;L
+192;190302340;DOSEN;Ani Hastuti Arthasari, S.T., M.Sc.;Dosen Karyawan;0503088004;P
+193;190302341;TENDIK;Fajar Sigit Purnomo;Karyawan Tetap;;L
+194;190302342;TENDIK;Heri Prasetyo Wibowo, S.Kom.;Karyawan Tetap;;L
+195;190302343;TENDIK;Muhammad Kurniawan, S.Kom.;Karyawan Tetap;;L
+196;190302344;TENDIK;Zendy Syahrial, S.Kom.;Karyawan Tetap;;L
+197;190302345;DOSEN;Niken Larasati, S.Kom, M.Eng;Dosen Tetap Khusus;0514119102;P
+198;190302348;DOSEN;Aditya Rizki Yudiantika, S.T., M.Eng;Dosen Tetap Khusus;0518038902;L
+199;190302350;DOSEN;Dwi Miyanto, S.ST., M.T;Dosen Tetap Khusus;0519058401;L
+200;190302351;DOSEN;Afrig Aminuddin, S.Kom., M.Eng., Ph.D.;Dosen Tetap Fulltime;0512089201;L
+201;190302352;DOSEN;I Made Artha Agastya, S.T., M.Eng., Ph.D.;Dosen Tetap Fulltime;0523088802;L
+202;190302354;DOSEN;Atik Nurmasani, S.Kom., M.Kom.;Dosen Tetap Fulltime;0515019202;P
+203;190302356;DOSEN;Agit Amrullah, S.Kom., M.Kom.;Dosen Tetap Fulltime;0510089101;L
+204;190302357;DOSEN;Kalis Purwanto, Dr, MM;Dosen Tetap Khusus;0506036001;L
+205;190302359;DOSEN;Alfriadi Dwi Atmoko, S.E., Ak., M.Si.;Dosen Tetap Fulltime;0526059301;L
+206;190302360;DOSEN;Dwi Pela Agustina, S.I.Kom., M.A.;Dosen Tetap Fulltime;0520088901;P
+207;190302361;DOSEN;Erfina Nurussa'adah, S.Kom.I., M.I.Kom.;Dosen Tetap Fulltime;0517129201;P
+208;190302362;DOSEN;Rivi Neritarani, S.Si., M.Eng.;Dosen Tetap Fulltime;0502048901;P
+209;190302363;DOSEN;Dr. Nurbayti, S.I.Kom., M.A.;Dosen Tetap Fulltime;0504048702;P
+210;190302364;DOSEN;Stara Asrita, S.I.Kom., M.A.;Dosen Tetap Fulltime;0509069101;P
+211;190302365;DOSEN;Gardyas Bidari Adninda, S.T., M.A.;Dosen Tetap Fulltime;0501049201;P
+212;190302366;DOSEN;Atika Fatimah, S.E., M.Ec.Dev.;Dosen Tetap Fulltime;0519088903;P
+213;190302367;DOSEN;Aditya Maulana Hasymi, S.IP., M.A.;Dosen Tetap Fulltime;0514059201;L
+214;190302370;DOSEN;Renindya Azizza Kartikakirana, S.T., M.Eng.;Dosen Tetap Fulltime;0528129002;P
+215;190302371;TENDIK;Agung Budi Nuridza, S.Kom.;Karyawan Tetap;;L
+216;190302372;TENDIK;Avi Dwi Gustianto, S.Psi.;Karyawan Tetap;;L
+217;190302373;TENDIK;Gunawan Nur Haryanto, S.M.;Karyawan Tetap;;L
+218;190302374;TENDIK;Rustam Ernawan;Karyawan Tetap;;L
+219;190302375;DOSEN;Theopilus Bayu Sasongko, S.Kom., M.Eng.;Dosen Tetap Fulltime;0627029001;L
+220;190302376;DOSEN;Afiuddin Ahmadi, S.T.;;;L
+221;190302380;DOSEN;Ermambang Bendung Wijaya, S.Sn;Dosen Freelance;;L
+222;190302381;DOSEN;Dida Karisma, S.Kom;;;L
+223;190302382;DOSEN;Edy Anan, S.E., M.Ak., Ak., CA;;0510107302;L
+224;190302383;DOSEN;Ni'mah Mahnunah, S.T., M.T.;Dosen Tetap Fulltime;0523118801;P
+225;190302386;DOSEN;S. L Harjanta, S.IP, M.Si;;0520058003;L
+226;190302387;DOSEN;Raditya Maulana Anuraga, M.Kom;;;L
+227;190302388;DOSEN;Elita Ariani, A.Md;;;P
+228;190302389;DOSEN;Dwiyono Iriyanto, Drs., M.M.;Dosen Tetap Khusus;0512016201;L
+229;190302390;DOSEN;Ibnu Hadi Purwanto, S.Kom., M.Kom.;Dosen Karyawan;0524119201;L
+230;190302391;DOSEN;Ika Asti Astuti, S.Kom., M.Kom.;Dosen Tetap Fulltime;0515089301;P
+231;190302392;DOSEN;Rifda Faticha Alfa Aziza, S.Kom., M.Kom.;Dosen Karyawan;0518129301;P
+232;190302393;DOSEN;Majid Rahardi, S.Kom., M.Eng.;Dosen Karyawan;0524119202;L
+233;190302394;DOSEN;Emil haryanto, S.E., ME;Dosen Tetap Fulltime;0519067001;L
+234;190302395;DOSEN;Widhiarta, M.Kom;;0506088501;L
+235;190302398;DOSEN;Wahyu Sudarmawan, SE., SH., M.Si;;0512036801;L
+236;190302400;DOSEN;El Johan Kristama, S.Kom;;;L
+237;190302402;DOSEN;Ari Kusmiatun, Dr;;0015077806;P
+238;190302403;TENDIK;Agus Sutopo;Karyawan Tetap;;L
+239;190302404;TENDIK;Nanang Liswanto;Karyawan Tetap;;L
+240;190302405;TENDIK;Widi Gusryanto, A.Md., S.Kom.;Karyawan Tetap;;L
+241;190302406;TENDIK;Andri Pratiwi, A.Md., S.E.;Karyawan Tetap;;P
+242;190302407;DOSEN;Toto Indriyatmoko, M.Kom;Dosen Tetap Khusus;0513099201;L
+243;190302408;DOSEN;M. Nuraminudin, S.Kom., M.Kom.;Dosen Tetap Fulltime;0506099301;L
+244;190302409;DOSEN;Pramudhita Ferdiansyah, S.Kom., M.Kom.;Dosen Tetap Fulltime;0516028502;L
+245;190302412;DOSEN;Yoga Pristyanto, S.Kom., M.Eng.;Dosen Tetap Fulltime;0514049301;L
+246;190302413;DOSEN;Subektiningsih, S.Kom., M.Kom.;Dosen Tetap Fulltime;0530058902;P
+247;190302415;DOSEN;Irwan Setiawanto, S.Kom, M.Eng;Dosen Tetap Khusus;0502108901;L
+248;190302418;DOSEN;Muzakki Ahmad, M.Kom;Dosen Tetap Khusus;0522069101;L
+249;190302419;DOSEN;Uyock Anggoro Saputro, S.Kom., M.Kom.;Dosen Tetap Fulltime;0521048702;L
+250;190302420;DOSEN;Juarisman, M.Kom;;0523128403;L
+251;190302421;DOSEN;Ifraweri Raja Mangkuto HP, S. Pd., M.Kom;;0510027201;L
+252;190302422;DOSEN;Maulana Brama Shandy, S.Kom;;;L
+253;190302424;DOSEN;Lalu Agam Pramdya Syalabi, M.Kom;Dosen Freelance;;L
+254;190302425;DOSEN;Nur Widjiyati, M.Kom;Dosen Tetap Khusus;0521107702;P
+255;190302426;DOSEN;Rafsanjani Arroisi, S.IKom;;;L
+256;190302427;DOSEN;Dhimas Adi Satria, S.Kom., M.Kom.;Dosen Tetap Fulltime;0501109301;L
+257;190302428;DOSEN;Rahmi Arifiana Dewi, S.Si;;;P
+258;190302429;DOSEN;Dewi Nur Indahsari Esti Rahayu, S.Si, MM;Dosen Freelance;;P
+259;190302430;DOSEN;Sunar Handari, S.Pd;;;P
+260;190302431;DOSEN;Halimatus Sadiyah, M.I.Kom;;;P
+261;190302432;DOSEN;Hans Hermang Mintana, S.Sos, M.A;;0516128301;L
+262;190302433;DOSEN;Dwi Nurrahmi Kusumastuti, M.I.Kom;;;P
+263;190302434;DOSEN;Susari Nugraheni, S.S, M. Sc;;;P
+264;190302435;DOSEN;Nurfian Yudhistira, S.I.Kom., M.A.;Dosen Tetap Fulltime;0521119101;L
+265;190302437;DOSEN;Sheila Lestari Giza Pudrianisa, S.I.Kom., M.I.Kom.;Dosen Tetap Fulltime;0521059201;P
+266;190302438;DOSEN;Muh. Ayub Pramana, S.H., M.H.;Dosen Tetap Khusus;0528056203;L
+267;190302439;DOSEN;Hennry Poerwanto B, Ir, MM, M.Kom;Dosen Freelance;0001065602;L
+268;190302441;TENDIK;Sanjaya Dwi Kusuma, S.Kom.;Karyawan Tetap;;L
+269;190302442;TENDIK;Tutut Hariyati, S.Kom.;Karyawan Tetap;;P
+270;190302443;DOSEN;Estiningsih, SE, MM;Dosen Tetap Khusus;0520106801;P
+271;190302444;DOSEN;Kartika Sari Yudaninggar, S.I.Kom., M.A.;Dosen Tetap Fulltime;0509029101;P
+272;190302445;DOSEN;Kadek Kiki Astria, S.I.Kom., M.A.;Dosen Tetap Fulltime;0515038901;P
+273;190302448;DOSEN;Zahrotus Sa'idah, S.I.Kom., M.A.;Dosen Tetap Fulltime;2109059003;P
+274;190302452;DOSEN;Wahid Miftahul Ashari, S.Kom., M.T.;Dosen Tetap Fulltime;0514129002;L
+275;190302453;DOSEN;Fredi Satya Candra Rosaji, S.Si., M.Sc;;;L
+276;190302454;DOSEN;Muhammad Koprawi, S.Kom., M.Eng.;Dosen Tetap Fulltime;0506019201;L
+277;190302455;DOSEN;Melany Mustika Dewi, S.Kom., M.Kom.;Dosen Tetap Fulltime;0526079301;P
+278;190302456;DOSEN;Jeki Kuswanto, S.Kom., M.Kom.;Dosen Tetap Fulltime;0526059501;L
+279;190302457;DOSEN;Dwi Rahayu, S.Kom., M.Kom;Dosen Tetap Khusus;0501029501;P
+280;190302458;DOSEN;Ria Andriani, S.Kom., M.Kom.;Dosen Tetap Fulltime;0531129401;P
+281;190302459;DOSEN;Ahmad Sa`di, S.Kom, M.Eng;;0513039002;L
+282;190302460;DOSEN;Sri Ekodoso Noworini, Dra., M.Hum;Dosen Freelance;;P
+283;190302461;DOSEN;Desi Hernila, S.Psi., MA;;;P
+284;190302462;DOSEN;Ali Sofwan, Dr., SE., M.Si., CAAT;Dosen Freelance;0609017301;L
+285;190302463;DOSEN;Khairullah Zikri, S.Ag., M.A., St. Rel;Dosen Freelance;2025057401;L
+286;190302464;DOSEN;Siti Khuzaimah, S.Th.I.,M.A;;;P
+287;190302465;DOSEN;M. Akbar Maulana, M.Kom;;;L
+288;190302467;DOSEN;Ahmad Zaid Rahman, M.Kom;Dosen Tetap Khusus;0518039701;L
+289;190302469;DOSEN;Ardian Yuligar Safagi, S.Kom;;;L
+290;190302470;DOSEN;M. Syaiful Anam, S.Kom;;;L
+291;190302471;DOSEN;Krisharyono, M.Sn;;;L
+292;190302472;DOSEN;Hernandes Saranela, S.Sn;;;L
+293;190302475;DOSEN;Riski Damastuti, S.Sos., M.A.;Dosen Tetap Fulltime;0525058803;P
+294;190302476;DOSEN;Rr. Pramesthi Ratnaningtyas, S.Sos., M.A.;Dosen Tetap Fulltime;0503098602;P
+295;190302477;DOSEN;Wiwid Adiyanto, A.Md., S.I.Kom., M.I.Kom.;Dosen Tetap Fulltime;0528078903;L
+296;190302478;DOSEN;Monika Pretty Aprilia, S.I.P., M.Si.;Dosen Tetap Fulltime;0526048503;P
+297;190302480;DOSEN;Anggit Ferdita Nugraha, S.T., M.Eng.;Dosen Tetap Fulltime;0525029301;L
+298;190302481;DOSEN;Surya Tri Atmaja Ramadhani, S.Kom.,M.Eng;Dosen Tetap Khusus;0525048903;L
+299;190302482;DOSEN;Vikky Aprelia Windarni, S.Kom., M.Cs;Dosen Tetap Khusus;0523049301;P
+300;190302483;DOSEN;Dewi Anisa Istiqomah, S.Pd., M.Cs;Dosen Tetap Khusus;0522019201;P
+301;190302484;DOSEN;Bayu Nadya Kusuma, S.T., M.Eng;Dosen Tetap Khusus;0505028902;L
+302;190302485;DOSEN;Yulinda Erlistyarini, S.I.Kom., M.Med.Kom.;Dosen Tetap Fulltime;0518079301;P
+303;190302486;DOSEN;Alvian Alrasid Ajibulloh, S.I.Kom., M.I.Kom.;Dosen Tetap Fulltime;0502109001;L
+304;190302488;TENDIK;Qowiyyul Azmi, S.Kom.;Karyawan Tetap;;L
+305;190302489;TENDIK;Galeh Priatmaja, S.Kom.;Karyawan Tetap;;L
+306;190302490;TENDIK;Fariesta Eka Pradana, S.Kom.;Karyawan Tetap;;L
+307;190302491;DOSEN;Eko Rahmat Slamet Hidayat Saputra, M.Kom;Dosen Tetap Khusus;0517129501;L
+308;190302492;DOSEN;Mujiyanto, M.Kom;Dosen Tetap Fulltime;0515109301;L
+309;190302493;DOSEN;Alva Hendi Muhammad, A.Md., S.T., M.Eng., Ph.D.;Dosen Tetap Fulltime;0518078401;L
+310;190302494;DOSEN;Ade Pujianto, M.Kom;Dosen Tetap Khusus;0521049501;L
+311;190302495;DOSEN;Arvin C Frobenius, S.Kom., M.Kom.;Dosen Tetap Fulltime;0508109302;L
+312;190302497;DOSEN;Muhammad Misbahul Munir, M.Kom;Dosen Tetap Khusus;0530069401;L
+313;190302498;DOSEN;Raden Muhammad Agung Harimurti P., Dr., M.Kom;Dosen Tetap Khusus;8884011019;L
+314;190302499;DOSEN;Yuniar Istiyani, S.IP., M.Sc;;0509068001;P
+315;190302500;DOSEN;Anggit Tiyas Fitra Romadani, M.Pd;Dosen Freelance;0519039101;P
+316;190302501;DOSEN;Halim Bayu Aji Sumarna, S.Kom;Dosen Freelance;;L
+317;190302502;DOSEN;Winarja, S.Kom;Dosen Freelance;;L
+318;190302503;DOSEN;Hary Budianto, S.Pd;Dosen Freelance;;L
+319;190302504;DOSEN;Imam Ainudin Pirmansah, M.Kom;Dosen Tetap Khusus;0504059401;L
+320;190302505;DOSEN;Demi Lidya Landau, S.Pd., M.Hum;;;P
+321;190302506;DOSEN;Wajar Bimantoro Suminto, Sn., M.Des;Dosen Tetap Khusus;0303047703;L
+322;190302507;DOSEN;Winda Sekar Dewi, M.Kom;;;P
+323;190302509;DOSEN;Herda Dicky Ramandita, M.Kom;Dosen Freelance;0518068702;L
+324;190302510;DOSEN;Weka Kusumastiti, M.Pd.;Dosen Freelance;0518128703;P
+325;190302513;DOSEN;Najib Cahyo Aji, S.Ds;Dosen Freelance;;L
+326;190302514;DOSEN;Budi Setiawan, S.Kom;Dosen Freelance;;L
+327;190302516;DOSEN;Jalu Trangga Laksita, S.Kom;Dosen Freelance;;L
+328;190302517;DOSEN;Aryo Wiryawan, S.T;Dosen Freelance;;L
+329;190302518;DOSEN;Haile Qudrat Djojodibroto, S.H., CMBA;;0501028503;L
+330;190302519;DOSEN;Yeni Wulandari, S.S., M.A.;Dosen Freelance;0504068501;P
+331;190302520;DOSEN;Yola Andesta Valenty, S.E., M.Ak.;Dosen Tetap Fulltime;0504119302;P
+332;190302521;DOSEN;Novita Ika Purnama Sari, S.I.Kom., M.A.;Dosen Tetap Fulltime;0526118902;P
+333;190302522;DOSEN;Andreas Tri Pamungkas, S.Sos., M.A.;Dosen Tetap Fulltime;0503068602;L
+334;190302524;DOSEN;Nafiatun Sholihah, S,Kom., M.Cs;Dosen Tetap Khusus;0506129001;L
+335;190302526;DOSEN;Novi Prisma Yunita, M.Kom;Dosen Tetap Khusus;0516119201;P
+336;190302527;TENDIK;Danis Irviana, S.Kom.;Karyawan Tetap;;P
+337;190302528;TENDIK;Okti Utari, S.Kom.;Karyawan Tetap;;P
+338;190302529;TENDIK;Tri Yunitasari, S.Kom.;Karyawan Tetap;;P
+339;190302530;TENDIK;Anisa Rahmawati Tsani, S.Kom.;Karyawan Tetap;;P
+340;190302531;TENDIK;Nanang Riyanto, S.Kom.;Karyawan Tetap;;L
+341;190302532;TENDIK;Sella Novitasari, S.Kom.;Karyawan Tetap;;P
+342;190302533;TENDIK;Norma Kurniasih, S.Kom.;Karyawan Tetap;;P
+343;190302534;DOSEN;Reisita Monica Astrid Cintha, M.A;Dosen Freelance;;P
+344;190302535;TENDIK;Achmad Nur Sahid, S.Si;Karyawan Tetap;;L
+345;190302536;TENDIK;Angga Adhi Prasetya;Karyawan Tetap;;L
+346;190302537;TENDIK;Purwo Dwi Andanu, S.Kom.;Karyawan Tetap;;L
+347;190302538;TENDIK;Firmansyah R. Ambarak, S.Kom.;Karyawan Tetap;;L
+348;190302539;TENDIK;Endri Prasetyo;Karyawan Tetap;;L
+349;190302540;TENDIK;Lizakamaliyah, S.Kom.;Karyawan Tetap;;P
+350;190302541;TENDIK;Isnaini Solichah, S.Kom.;Karyawan Tetap;;P
+351;190302542;TENDIK;Alderi Pungki Hadiwibowo;Karyawan Tetap;;L
+352;190302543;TENDIK;Laicco Ervanda, A.Md.;Karyawan Tetap;;L
+353;190302544;TENDIK;Muhammad Mahfudh, S.Kom.;Karyawan Tetap;;L
+354;190302545;TENDIK;Rudy Hartoko, S.A.P;Karyawan Tetap;;L
+355;190302546;TENDIK;Zaini Setyo Ahmadi, S.I.P.;Karyawan Tetap;;L
+356;190302547;DOSEN;Andre Kussuma Adiputra, SE, M.Si;Dosen Freelance;;L
+357;190302548;DOSEN;Auliya Shoffi, SE, M.Ak;Dosen Freelance;9905005316;P
+358;190302549;DOSEN;Muhammad Sofyan Indrajaya, SE, M.Acc;Dosen Freelance;;L
+359;190302550;DOSEN;Dedy Hariyadi, ST, M.Kom;Dosen Freelance;;L
+360;190302551;DOSEN;Nadea Cipta Laksmita, M.Kom;Dosen Tetap Khusus;0504109601;P
+361;190302552;DOSEN;Rifai Ahmad Musthofa, M.Kom;Dosen Tetap Khusus;0508079501;L
+362;190302553;DOSEN;Hamid Muzaki, MM;Dosen Freelance;;L
+363;190302554;DOSEN;Miski, SHI, M.Sos;Dosen Freelance;;L
+364;190302555;DOSEN;I Gede Eka Susanto, ST, MM;Dosen Freelance;;L
+365;190302556;DOSEN;Theresia Sumartini, SIP, MPA;Dosen Freelance;;P
+366;190302557;DOSEN;Sugiyatno, S.Kom, M.Kom;Dosen Freelance;;L
+367;190302558;DOSEN;Hana Nimashita, M.A;Dosen Freelance;0002027901;P
+368;190302559;DOSEN;Patisina, Dr., ST., M.Eng.;Dosen Freelance;1030127901;L
+369;190302561;DOSEN;Elin Nur Rachmawati, M.Pd;Dosen Freelance;;P
+370;190302564;DOSEN;Yoga Darmajati, M.Sc;Dosen Freelance;;L
+371;190302565;DOSEN;Annisa Hertami Kusumastuti Yudhomo, M.Sn;Dosen Freelance;;P
+372;190302566;DOSEN;Dr. Ari Sulistyo, S.Pd, M.Sc;Dosen Freelance;;L
+373;190302567;DOSEN;Komang Aryasa, S.Kom.,M.T;Dosen Freelance;;L
+374;190302568;DOSEN;Erfan Hasmin, S.Kom, M.T;Dosen Freelance;;L
+375;190302569;DOSEN;Rismayani, S.Kom, MT;Dosen Freelance;0908048702;P
+376;190302570;DOSEN;M. Syukri Mustafa, S.Si.,MMSI;Dosen Freelance;;L
+377;190302571;DOSEN;Mulyadi Erman, S.Ag, MA;Dosen Tetap Khusus;0520037201;L
+378;190302573;DOSEN;Dodi Setiawan R, S.Psi, MBA, Dr.;Dosen Tetap Khusus;0505088303;L
+379;190302574;DOSEN;Uswatun Khasanah, S.Si, M.Pd.Si;Dosen Tetap Khusus;0518128201;P
+380;190302575;DOSEN;Dr. Kumara Ari Yuana, ST, MT;Dosen Tetap Khusus;0515067101;L
+381;190302577;DOSEN;Edy Musoffa, S.Ag, M.H;Dosen Tetap Khusus;0525026902;L
+382;190302578;DOSEN;Nurhayanto, SE, MBA;Dosen Tetap Khusus;0528096901;L
+383;190302579;DOSEN;Irton, S.E, M.Si;Dosen Tetap Khusus;0502026403;L
+384;190302580;DOSEN;Eko Pramono, S.Si, M.T;Dosen Tetap Khusus;0522067101;L
+385;190302581;DOSEN;Narwanto Nurcahyo, SH, MM;Dosen Tetap Khusus;0509076301;L
+386;190302582;DOSEN;Stevi Ema Wijayanti, M.Kom;Dosen Tetap Khusus;0519039001;P
+387;190302584;DOSEN;Lia Ayu Ivanjelita, M.Kom;Dosen Tetap Fulltime;0528069101;P
+388;190302585;DOSEN;Rizki Tri Puji Wanggono, M.Kom;Dosen Freelance;;L
+389;190302587;DOSEN;Dr. Reza Widhar Pahlevi, S.E., M.M.;Dosen Tetap Khusus;0501119001;L
+390;190302588;DOSEN;Sutarni, S.E., M.M.;Dosen Tetap Fulltime;0206078301;P
+391;190302590;DOSEN;Fadeyanto Prabowo, S.Sos, M.A;Dosen Freelance;0510128502;L
+392;190302591;DOSEN;Fernan Rahadi, S.I.P., M.A.;Dosen Freelance;;L
+393;190302592;DOSEN;Latifaestrelita Indi Pramesti Aji, S.Kom;Dosen Freelance;;P
+394;190302593;DOSEN;Reny Triwardani, M.A;Dosen Freelance;0510058401;P
+395;190302594;DOSEN;Rizky Fauziah, M.Kom, M.Ikom;Dosen Freelance;0112039501;P
+396;190302595;DOSEN;Muhammad Manar Barmawi, Ak., M.Ak.;Dosen Freelance;0519047602;L
+397;190302597;DOSEN;Artha Tri Hastutiningsih, S.Kom, MM;Dosen Freelance;;P
+398;190302598;DOSEN;Ira Ida Yustina, S.Pd, M.Pd;Dosen Freelance;0518077602;P
+399;190302599;DOSEN;Junaidi, S.Ag., M.Hum, Dr.;Dosen Tetap Khusus;0504077201;L
+400;190302601;DOSEN;Adrianto Mahendra Wijaya, S.Si, MT;Dosen Freelance;;L
+401;190302602;DOSEN;Yesaya Tommy Paulus, S.Kom., MT., Ph.D;Dosen Freelance;;L
+402;190302618;DOSEN;Bahrun Ghozali, S.Kom., M.Kom;Dosen Tetap Fulltime;0510079001;L
+403;190302621;DOSEN;Dr. Ir. Hamdi Buldan, M.T.;Dosen Tetap Khusus;0508057002;L
+404;190302622;DOSEN;Hendry Sugara, S.Pd., M.Pd.;Dosen Freelance;0408049101;L
+405;190302623;DOSEN;Oktafiani Herlina, S.S., M.A;Dosen Freelance;0504108201;P
+406;190302624;DOSEN;Agus Susanto S.Pd., M.I.Kom;Dosen Freelance;;L
+407;190302625;DOSEN;Dewa Made Budi Swardana,S.E., M.M.;Dosen Freelance;;L
+408;190302626;DOSEN;Dr. Irsasri, M.Pd,;Dosen Freelance;0623078501;L
+409;190302627;DOSEN;Arrizqi Qonita Apriliana, S.I.Kom, M.A.;Dosen Tetap Khusus;0529049601;P
+410;190302628;TENDIK;Riezky Mubarok, S.Kom.;Karyawan Tetap;;L
+411;190302629;TENDIK;Aziz Muslim, S.Kom.;Karyawan Tetap;;L
+412;190302630;DOSEN;Dessy Riana Sari, S.Pd, M.Kom;Dosen Freelance;;P
+413;190302631;DOSEN;Afifah Nur Aini, M.Kom;Dosen Tetap Khusus;0519049602;P
+414;190302632;TENDIK;Kukuh Nova Putra, S.Kom.;Karyawan Tetap;;L
+415;190302634;TENDIK;Kurnia Astari, S.Ip;Karyawan Tetap;;P
+416;190302635;TENDIK;Ero Wahyu Pratomo, S.Kom.;Karyawan Tetap;;L
+417;190302636;TENDIK;Ashri Nurhidayati, S.Geo.;Karyawan Tetap;;P
+418;190302637;TENDIK;M. Iqbal Abdullah Sukri, S.Kom., M.Kom.;Karyawan Tetap;;L
+419;190302638;TENDIK;Dewi Mustika Sari, S.Kom.;Karyawan Tetap;;P
+420;190302639;DOSEN;Dr. Moch. Hamied Wijaya, M.M;Dosen Tetap Khusus;0512076703;L
+421;190302640;TENDIK;Nur Anisah, S.Kom.;Karyawan Tetap;;P
+422;190302642;TENDIK;M. Iqbal Luthfi Ridarman, S.Kom.;Karyawan Tetap;;L
+423;190302643;DOSEN;Achmad Djunaedi, Ir., MUP., Ph.D., Prof;Dosen Freelance;;L
+424;190302644;TENDIK;Ragil Syahputro, S.Kom.;Karyawan Tetap;;L
+425;190302645;DOSEN;Dian Utami, SE, M.Ak, CLI, CPA;Dosen Freelance;;P
+426;190302646;TENDIK;Sindi Claudia, A.Md, Kom.;Karyawan Tetap;;P
+427;190302648;TENDIK;Acep Saifulloh, A.Md.;Karyawan Tetap;;L
+428;190302649;TENDIK;Amjad Haidar, S.E.;Karyawan Tetap;;L
+429;190302650;TENDIK;Nur Hasim;Karyawan Tetap;;L
+430;190302651;TENDIK;Sudarmadi;Karyawan Tetap;;L
+431;190302652;DOSEN;Buyut Khoirul Umri, M.Kom;Dosen Tetap Khusus;0529119701;L
+432;190302653;DOSEN;Yoga Sahria, S.Kom., M.Kom., Ir., Dr.;Dosen Tetap Khusus;0511079501;L
+433;190302655;DOSEN;Devi Wening Astari, M.I.Kom;Dosen Tetap Khusus;0503048803;P
+434;190302656;DOSEN;Etik Anjar Fitriarti, S.I.Kom., M.A.;Dosen Tetap Khusus;0530039302;P
+435;190302657;DOSEN;Rufki Ade Vinanda, S.I.Kom., M.A.;Dosen Tetap Khusus;0502119301;P
+436;190302659;DOSEN;Bela Fataya Azmi, S.Kom.I., M.A.;Dosen Tetap Khusus;0517039501;P
+437;190302660;DOSEN;Raden Arditya Mutwara Lokita, M.I.Kom;Dosen Tetap Khusus;0511028904;L
+438;190302661;DOSEN;Anggun Anindya Sekarningrum, M.I.Kom;Dosen Tetap Khusus;0529099001;P
+439;190302662;TENDIK;Arifin Imawan, S.Kom;Karyawan Tetap;;L
+440;190302663;DOSEN;Dinda Sukmaningrum, S.T., M.M;Dosen Tetap Fulltime;0512098301;P
+441;190302664;DOSEN;Cicilia Dwi Setyorini, S.Pd., M.Hum;Dosen Freelance;;P
+442;190302665;DOSEN;Riza Pahlevi, S.Tr.I.Kom., M.Sn;Dosen Freelance;;L
+443;190302666;DOSEN;Rafi Kurnia Rachbini, S.Kom., M.Kom;Dosen Freelance;;L
+444;190302667;DOSEN;Vicki Hanim Roiva, S.E., M.B.A;Dosen Freelance;;P
+445;190302668;DOSEN;Ika Destina Puspita S.S., M.A.;Dosen Freelance;;P
+446;190302669;DOSEN;April Purwanto, S.Ag., M.E.I;Dosen Freelance;;L
+447;190302670;DOSEN;Rizki Mintari, M.Pd;Dosen Freelance;;P
+448;190302671;DOSEN;Miko Kastomo Putro, M.Kom.;Dosen Tetap Khusus;0516039701;L
+449;190302672;DOSEN;Marita Nurharjanti, S.Pd., M.Pd;Dosen Tetap Khusus;0518037201;P
+450;190302673;DOSEN;Hermenegildus Agus Wibowo, S.S., M.Hum.;Dosen Tetap Khusus;0513048101;L
+451;190302674;DOSEN;Efrat Tegris, S.S., M.Pd;Dosen Tetap Khusus;0519097801;L
+452;190302675;DOSEN;Kardilah Rohmat Hidayat, M.Kom;Dosen Tetap Fulltime;0501069101;L
+453;190302676;DOSEN;Fiyas Mahananing Puri, M.Kom;Dosen Tetap Fulltime;0512029203;P
+454;190302677;DOSEN;Eva Budiana, S.Ak., M.Ak;Dosen Freelance;;P
+455;190302678;DOSEN;Lutfi Windayani, S.E., M.Ak., Ak., CA., ACPA;Dosen Freelance;;P
+456;190302679;DOSEN;Amirudin Khorul Huda, M.Kom;Dosen Tetap Khusus;0123099402;L
+457;190302682;DOSEN;Abd. Mizwar A. Rahim, M.Kom;Dosen Tetap Khusus;0531109901;L
+458;190302683;DOSEN;Fauzia Anis Sekarningrum, S.T., M.T;Dosen Tetap Khusus;0530069601;P
+459;190302684;DOSEN;Arif Nur Rohman, M.Kom;Dosen Tetap Fulltime;0525109202;L
+460;190302685;DOSEN;Ichsan Wasiso, M.Kom;Dosen Tetap Khusus;0510088501;L
+461;190302686;DOSEN;Marwan Noor Fauzy, M.Kom;Dosen Tetap Khusus;0507099401;L
+462;190302687;DOSEN;Caraka Aji Pranata, M.Kom;Dosen Tetap Khusus;0508129302;L
+463;190302688;DOSEN;Eko Tri Anggono, S.E., M.M;Dosen Tetap Fulltime;0502077804;L
+464;190302689;DOSEN;Yana Hendriana, S.T., M.Eng;Dosen Freelance;;L
+465;190302690;DOSEN;Irma Suwarning D, S.Psi., M.Psi;Dosen Tetap Fulltime;0507118302;P
+466;190302695;DOSEN;Tunggul Wicaksono, S.I.P., M.A;Dosen Tetap Khusus;0506129501;L
+467;190302696;DOSEN;Yohanes William Santoso, S.Hub.Int., M.Hub.Int.;Dosen Tetap Fulltime;0514099701;L
+468;190302697;DOSEN;Feri Ludiyanto, S.Sn., M.Sn.;Dosen Tetap Khusus;0515018102;L
+469;190302699;TENDIK;Rizki Nur Ikhtiari, S.M.;Karyawan Tetap;;P
+470;190302700;TENDIK;Haviesha Shafirra Ayunisaa, S.S.;Karyawan Tetap;;P
+471;190302701;TENDIK;Muhammad Irfan Sya’bani, S.Kom.;Karyawan Tetap;;L
+472;190302702;DOSEN;Yudha Riwanto, M.Kom;Dosen Tetap Khusus;0518039702;L
+473;190302703;DOSEN;Hendri Kurniawan Prakosa, S.Kom., M.Cs;Dosen Tetap Khusus;0530079002;L
+474;190302704;DOSEN;Deni Kurnianto Nugroho, S.Pd., M.Eng;Dosen Tetap Khusus;0505089401;L
+475;190302705;DOSEN;Ajie Kusuma Wardhana, S.Kom., M.Eng;Dosen Freelance;0515129501;L
+476;190302706;DOSEN;Enda Putri Atika, M.Kom;Dosen Tetap Khusus;0524089901;P
+477;190302707;DOSEN;Bambang Pilu Hartato, S.Kom., M.Eng;Dosen Tetap Khusus;0609069202;L
+478;190302708;DOSEN;Ahmad Ridwan, S.Tr.T., M.T;Dosen Tetap Khusus;9990631364;L
+479;190302710;DOSEN;Fitriansyah, S.Si., M.Eng.;Dosen Tetap Fulltime;0509107504;L
+480;190302711;DOSEN;Prasetyo Purnomo, S.Kom., M.Kom;Dosen Tetap Fulltime;0523108601;L
+481;190302712;DOSEN;Dyah Ayu Kusumawardani, S. Pd., M. Pd.;Dosen Freelance;;P
+482;190302713;DOSEN;Eny Ariyanto, S.E., M.Si., Dr.;Dosen Tetap Khusus;8992090024;L
+483;190302714;DOSEN;David Agustriawan, S.Kom., M.Sc., Ph.D.;Dosen Freelance;0525088601;L
+484;190302715;DOSEN;Arli Aditya Parikesit, S.Si., M.Si, Dr.rer.nat.;Dosen Freelance;2127067901;L
+485;190302716;TENDIK;Diamonda Beauty Fani, S.Ak.;Karyawan Tetap;;P
+486;190302718;TENDIK;Dimas Ihdam Maulana, S.Kom.;Karyawan Tetap;;L
+487;190302719;TENDIK;M. Rohmadi Ilham, S.Kom.;Karyawan Tetap;;L
+488;190302720;TENDIK;Fajar Nuraini Dwi Fatimah, S.Kom.;Karyawan Tetap;;P
+489;190302721;TENDIK;Fitri Hanifah Fadli, S.Kom.;Karyawan Tetap;;P
+490;190302722;DOSEN;Rendy Mahardika, S.Kom., M.Kom;Dosen Tetap Khusus;0511069202;L
+491;190302723;DOSEN;Hayati, SS., M.A;Dosen Freelance;;P
+492;190302724;DOSEN;Alfian Muhazir, S.Sos., M.A;Dosen Freelance;;L
+493;190302725;DOSEN;Dian Lestari, S.Pd., M.Pd;Dosen Freelance;;P
+494;190302726;DOSEN;Achmad Djatmiko, M.A., Dr.;Dosen Freelance;;L
+495;190302727;DOSEN;Cucut Susanto, S.Kom., M.Si., Dr.;Dosen Freelance;0927117301;L
+496;190302728;TENDIK;Wahyu Dwi Hartarto, S.Kom.;Karyawan Tetap;;L
+497;190302729;DOSEN;Ibnul Muntaza, S.P.W.K., M.URP;Dosen Tetap Khusus;4145776677130133;L
+498;190302730;DOSEN;Muhammad Najih Fasya, S.P.W.K., M.PAR.;Dosen Tetap Khusus;0506019801;L
+499;190302731;DOSEN;Isti Nur Rahmahwati, S.IP., Ll.M., Ph.D.;Dosen Tetap Fulltime;0531079301;P
+500;190302732;TENDIK;Muhammad Rafly Indrawan, S. Kom.;Karyawan Kontrak Fulltime;;L
+501;190302733;DOSEN;Kusumaningdiah Retno Setiorini, S.E., Ak., M.Ak., CA., Dr.;Dosen Freelance;0519058101;P
+502;190302734;DOSEN;Lubna, M.Kom;Dosen Freelance;;P
+503;190302735;DOSEN;Anip Moniva, M.Kom;Dosen Freelance;;P
+504;190302736;DOSEN;Herin Dwibima Aprianto, M.Kom;Dosen Freelance;;L
+505;190302737;DOSEN;Danu Prawira Utama, M.Kom;Dosen Freelance;;L
+506;190302738;DOSEN;Ir. Erik Febriarta, S.Si., M.Sc.;Dosen Freelance;;L
+507;190302739;TENDIK;Dian Amin Muhtahsin, S.Pd., M.Pd.;Karyawan Tetap;;L
+508;190302741;DOSEN;Linda Hijriyah, S.T., M.Arch., Ph.D.;Dosen Freelance;;P
+509;190302742;TENDIK;Baharuddin Ngamar Yusuf, S.I.Kom.;Karyawan Kontrak Fulltime;;L
+510;190302743;DOSEN;Dr. Mohamad Ilyas Abas, S.SI., M.Kom;Dosen Freelance;0926089101;L
+511;190302744;DOSEN;Muhammad Alfian Hermawan, S.Pd., M.Pd.;Dosen Freelance;;L
+512;190302745;DOSEN;Amanah, S.Pd., M.Pd;Dosen Freelance;;P
+513;190302746;DOSEN;Fitria Wiyarti Nindyaningrum, M.Pd.;Dosen Freelance;;P
+514;190302747;DOSEN;Dr. Mawaidi, S.S., M.Pd.;Dosen Freelance;;L
+515;190302748;DOSEN;Qorib Munajat, S.Kom., M.Kom.;Dosen Tetap Khusus;;L
+516;555124;DOSEN;Eko Boedijanto, M.T.;;;L
+517;555125;DOSEN;Baldric Siregar, Prof., Dr., MBA., CMA., CA.Ak.,;Dosen Freelance;0520096903;L
+518;555169;DOSEN;Adi Djayusman, S.Kom., M.Kom;Dosen NIDN;0514058202;L
+519;555195;DOSEN;Wing Wahyu Winarno, Dr., MAFIS., Ak.;;0525016201;L
+520;555200;DOSEN;Ayuni Fitria, S.Pd., M.A;Dosen Freelance;0520068503;P
+521;555218;DOSEN;Sukoco, S.Si, M.Si, M.Kom;;0611086801;L
+522;555221;DOSEN;Evans Fuad, S.Kom, M.Eng;;;L
+523;555227;DOSEN;Retantyo Wardoyo, Drs., M.Sc., Ph.D.;;0011035906;L
+524;555228;DOSEN;Dian Pertiwi, M.Kom;;;P
+525;555253;DOSEN;Agung Wijanarko, S.Sos, MM;;0513066803;L
+526;88826;DOSEN;Bambang Suseno, Drs;;;L
+527;88827;DOSEN;Sholeh, M.T;;;L
+528;88896;DOSEN;Petra Surya Mega Wijaya, M.Si;Dosen Freelance;0501127202;L

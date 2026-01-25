@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/javascript.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistem Jadwal Pendadaran AI</title>
+  <style>
+    /* Anti-FOUC: Sembunyikan konten sampai CSS/JS siap */
+    body {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease-out;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="logo-icon">AI</div>
+        <span class="brand-name">Pendadaran.</span>
+      </div>
+
+      <nav>
+        <a href="#" class="nav-item active" data-page="home">
+          <span class="nav-icon">📊</span>
+          <span>Beranda</span>
+        </a>
+        <a href="#" class="nav-item" data-page="dosen">
+          <span class="nav-icon">👨‍🏫</span>
+          <span>Data Dosen</span>
+        </a>
+        <a href="#" class="nav-item" data-page="mahasiswa">
+          <span class="nav-icon">🎓</span>
+          <span>Data Mahasiswa</span>
+        </a>
+        <a href="#" class="nav-item" data-page="libur">
+          <span class="nav-icon">📅</span>
+          <span>Dosen Libur</span>
+        </a>
+        <a href="#" class="nav-item" data-page="logic">
+          <span class="nav-icon">⚙️</span>
+          <span>Eksplorasi Logika</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Toggle Button - Outside main-content so it persists -->
+    <button class="sidebar-toggle" id="sidebar-toggle" onclick="window.toggleSidebar()" title="Toggle Sidebar">
+      <span class="toggle-icon">☰</span>
+    </button>
+
+    <main class="main-content" id="main-content">
+      <!-- Konten akan dimuat di sini -->
+    </main>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
