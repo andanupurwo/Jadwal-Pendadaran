@@ -1,4 +1,15 @@
+// Basic error logger for debugging
+window.onerror = function (msg, url, line, col, error) {
+    console.error('GLOBAL ERROR:', msg, 'at', line, ':', col, error);
+    if (document.body) {
+        document.body.style.opacity = '1';
+        document.body.style.pointerEvents = 'auto';
+    }
+    return false;
+};
+
 import './style.css'
+import './modal.css'
 import { loadDosenData } from './loadDosenData.js'
 import { loadFacultyData } from './loadFacultyData.js'
 
@@ -30,6 +41,8 @@ import {
 
 import { processMatching } from './logic/matching.js'
 import { isDosenAvailable } from './logic/availability.js'
+import { INITIAL_MAHASISWA } from './data/initialMahasiswa.js'
+import { INITIAL_LIBUR } from './data/initialLibur.js'
 
 const mainContent = document.getElementById('main-content');
 const navItems = document.querySelectorAll('.nav-item');
@@ -42,6 +55,7 @@ let sortColumn = appState.sortColumn;
 let sortDirection = appState.sortDirection;
 let searchTerm = appState.searchTerm;
 let selectedProdiFilter = appState.selectedProdiFilter;
+let selectedStatusFilter = appState.selectedStatusFilter || 'all';
 
 // Note: MOCK_DATA, appState, ROOMS, TIMES, DATES, MAX_EXAMINER_ASSIGNMENTS
 // and helper functions are now imported from modules above
@@ -50,35 +64,7 @@ let selectedProdiFilter = appState.selectedProdiFilter;
 // processMatching, sortData, filterData) are now imported from modules
 
 
-// Helper parsing CSV sederhana (dengan dukungan quotes)
-function parseCSVLine(line) {
-    // Deprecated for the new specific parsers below, but kept if needed
-    const result = [];
-    let current = '';
-    let inQuotes = false;
 
-    for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        const nextChar = line[i + 1];
-
-        if (char === '"') {
-            if (inQuotes && nextChar === '"') {
-                current += '"';
-                i++;
-            } else {
-                inQuotes = !inQuotes;
-            }
-        } else if (char === ',' && !inQuotes) {
-            result.push(current.trim());
-            current = '';
-        } else if (char !== '\r') {
-            current += char;
-        }
-    }
-
-    result.push(current.trim());
-    return result;
-}
 
 // Import SDM master (kolom: No;Nik;Status (Dosen/Tendik);Nama;Kategori Dosen/Karyawan;NIDN;Jenis Kelamin)
 function importSDM(text) {
@@ -115,68 +101,7 @@ function importSDM(text) {
     return result;
 }
 
-// Import FES/FST/FIK (kolom: NIK, DOSEN, PRODI)
-function importFaculty(text, fakultas) {
-    const lines = text.split('\n').filter(l => l.trim());
-    if (lines.length <= 1) return [];
 
-    // Deteksi separator
-    const firstLine = lines[0];
-    const separator = firstLine.includes(';') ? ';' : ',';
-
-    const parseLine = (line) => {
-        if (!line) return [];
-        // Handle quotes for names with commas e.g. "Name, Title"
-        const result = [];
-        let current = '';
-        let inQuotes = false;
-
-        for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-            if (char === '"') {
-                inQuotes = !inQuotes;
-            } else if (char === separator && !inQuotes) {
-                result.push(current.trim());
-                current = '';
-            } else {
-                current += char;
-            }
-        }
-        result.push(current.trim());
-        return result;
-    };
-
-    // Header mapping (case insensitive)
-    const headerLine = lines[0].toLowerCase();
-    const headers = parseLine(headerLine);
-
-    // Find column indices
-    const idxNik = headers.findIndex(h => h === 'nik');
-    const idxNama = headers.findIndex(h => h.includes('dosen') || h.includes('nama'));
-    const idxProdi = headers.findIndex(h => h.includes('prodi'));
-
-    const result = [];
-    for (let i = 1; i < lines.length; i++) {
-        const v = parseLine(lines[i]);
-
-        // Skip header if re-read inside loop (not happening here due to starting at i=1)
-
-        const nama = idxNama >= 0 ? v[idxNama] || '' : '';
-        // Clean up quotes from name if present - logic already handled by parseLine loosely but let's be sure
-        const cleanNama = nama.replace(/^"|"$/g, '').trim();
-
-        if (!cleanNama) continue;
-
-        result.push({
-            nomor: i,
-            nik: idxNik >= 0 ? v[idxNik] || '-' : '-',
-            nama: cleanNama,
-            prodi: idxProdi >= 0 ? v[idxProdi] || '-' : '-',
-            fakultas
-        });
-    }
-    return result;
-}
 
 // Application initialization
 async function initializeApp() {
@@ -189,8 +114,12 @@ async function initializeApp() {
             document.body.style.pointerEvents = 'auto';
         });
 
-        // Render halaman pertama
-        navigate('home');
+        // Render halaman pertama - ensure views is defined or wait
+        if (typeof views !== 'undefined' && views.home) {
+            navigate('home');
+        } else {
+            console.error('Views not available yet during init');
+        }
 
         // Load SDM master data
         console.log('📥 Loading SDM master data...');
@@ -206,30 +135,54 @@ async function initializeApp() {
             console.log('📥 Loading faculty data from Dosen Prodi.csv...');
             const facultyDataRaw = await loadFacultyData();
 
-            // Verify faculty data against SDM
-            console.log('🔍 Verifying faculty data against SDM...');
-            const { verifyFacultyData } = await import('./loadFacultyData.js');
-            const verificationResults = verifyFacultyData(facultyDataRaw, MOCK_DATA.masterDosen);
+            // Assign raw data first
+            MOCK_DATA.facultyData = facultyDataRaw;
 
-            // Update MOCK_DATA with verified data
-            MOCK_DATA.facultyData = {
-                FIK: verificationResults.FIK.details,
-                FES: verificationResults.FES.details,
-                FST: verificationResults.FST.details
-            };
+            // Run sophisticated matching (Logic Centralized)
+            console.log('🔍 Running advanced matching algorithm...');
+            processMatching();
 
-            console.log('✅ Faculty data loaded from CSV and verified.');
+            console.log('✅ Faculty data loaded from CSV and matched.');
             // Save initial CSV state to storage
             if (typeof saveFacultyDataToStorage === 'function') saveFacultyDataToStorage();
         }
 
         // Load Mahasiswa Data
         if (typeof loadMahasiswaFromStorage === 'function') {
-            loadMahasiswaFromStorage();
+            loadMahasiswaFromStorage(); // Loads array from storage (e.g. 92 items)
+
+            // DATABASE INTEGRITY CHECK: Remove Duplicate Records
+            // (Fixes potential data duplication from previous seeding)
+            if (MOCK_DATA.mahasiswa && MOCK_DATA.mahasiswa.length > 0) {
+                const uniqueStudents = [];
+                const seenNim = new Set();
+                let duplicatesFound = 0;
+
+                MOCK_DATA.mahasiswa.forEach(m => {
+                    if (!seenNim.has(m.nim)) {
+                        seenNim.add(m.nim);
+                        uniqueStudents.push(m);
+                    } else {
+                        duplicatesFound++;
+                    }
+                });
+
+                if (duplicatesFound > 0) {
+                    console.log(`🧹 Database Integrity Check: Removed ${duplicatesFound} duplicate records.`);
+                    MOCK_DATA.mahasiswa = uniqueStudents; // Updates it to ~80
+                    if (typeof saveMahasiswaToStorage === 'function') saveMahasiswaToStorage();
+                }
+            }
         }
-        // Save default mahasiswa if storage empty
-        else if (typeof saveMahasiswaToStorage === 'function') {
-            saveMahasiswaToStorage();
+
+        // --- DATABASE SEEDING (First Run) ---
+        // If database is empty, seed with initial data
+        if (!MOCK_DATA.mahasiswa || MOCK_DATA.mahasiswa.length === 0) {
+            console.log('📦 Initializing Database with Seed Data...');
+            MOCK_DATA.mahasiswa = INITIAL_MAHASISWA;
+            if (typeof saveMahasiswaToStorage === 'function') {
+                saveMahasiswaToStorage();
+            }
         }
 
         // Load persistensi status Dosen (OFF/ON) dari LocalStorage
@@ -240,6 +193,15 @@ async function initializeApp() {
         // Load persistensi data Dosen Libur dari LocalStorage
         if (typeof loadLiburFromStorage === 'function') {
             loadLiburFromStorage();
+        }
+
+        // --- DATABASE SEEDING (Libur) ---
+        if (!MOCK_DATA.libur || MOCK_DATA.libur.length === 0) {
+            console.log('📅 Initializing Libur Data with Seed Data...');
+            MOCK_DATA.libur = INITIAL_LIBUR;
+            if (typeof saveLiburToStorage === 'function') {
+                saveLiburToStorage();
+            }
         }
 
         // Refresh view jika user sedang di tab dosen
@@ -282,40 +244,51 @@ const views = {
             : TIMES;
 
         return `
-            <header style="display: flex; justify-content: space-between; align-items: start;">
-                <div>
-                    <h1>Jadwal Sidang Pendadaran</h1>
-                    <p class="subtitle">Manajemen slot ruangan berdasarkan tanggal pelaksanaan.</p>
-                </div>
-                <div style="display: flex; gap: 0.5rem;">
-                    ${MOCK_DATA.clipboard ? `
-                        <div class="card" style="margin: 0; padding: 0.5rem 1rem; background: var(--primary-subtle); border: 1px dashed var(--primary); display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 0.8rem; font-weight: 600; color: var(--primary);">📋 Clipboard: ${MOCK_DATA.clipboard.student}</span>
-                            <button onclick="window.moveSlotToClipboard(null)" style="padding: 2px 8px; font-size: 0.7rem; background: var(--danger);">Batal</button>
-                        </div>
-                    ` : ''}
-                    <button onclick="window.generateSchedule()" style="background: var(--secondary); border: none; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(94, 92, 230, 0.3);">
-                        ⚡ Proses Jadwal Otomatis
-                    </button>
-                </div>
-            </header>
-            
-            <!-- Date Selector Tabs -->
-            <div class="tabs-container" style="overflow-x: auto; margin-bottom: 1.5rem; padding-bottom: 5px;">
-                <div class="tabs" style="display: flex; flex-wrap: nowrap; width: max-content;">
-                    ${DATES.map(item => {
+            <div class="container">
+                <header class="page-header">
+                    <div class="header-info">
+                        <h1>Dashboard</h1>
+                        <p class="subtitle">Monitoring slot dan ketersediaan ruangan.</p>
+                    </div>
+                    <div class="header-actions">
+                        ${MOCK_DATA.clipboard ? `
+                            <div class="card" style="margin: 0; padding: 0.6rem 1.25rem; background: var(--primary-subtle); border: 1px dashed var(--primary); display: flex; align-items: center; gap: 12px; border-radius: 12px;">
+                                <span style="font-size: 0.9rem; font-weight: 600; color: var(--primary);">📋 Clipboard: ${MOCK_DATA.clipboard.student}</span>
+                                <button onclick="window.moveSlotToClipboard(null)" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">Batal</button>
+                            </div>
+                        ` : ''}
+                        <button onclick="window.generateSchedule()" class="btn-primary">
+                            ⚡ Proses Jadwal Otomatis
+                        </button>
+                    </div>
+                </header>
+                
+                <!-- Date Selector Tabs -->
+                <div class="tabs-container" style="margin-bottom: 2rem;">
+                    <div class="tabs" style="display: flex; gap: 4px; padding: 4px; background: rgba(118, 118, 128, 0.08); border-radius: 14px;">
+                        ${DATES.map((item, index) => {
             const hasSchedule = MOCK_DATA.slots.some(s => s.date === item.value);
+            const isActive = currentDate === item.value;
+
+            // Separator logic: Add line between Friday and Monday
+            let separator = '';
+            if (index > 0 && item.label === 'Senin' && DATES[index - 1].label === 'Jumat') {
+                separator = `<div style="width: 1px; height: 24px; background: var(--border); margin: auto 4px;"></div>`;
+            }
+
             return `
-                        <div class="tab-item ${currentDate === item.value ? 'active' : ''}" 
-                             onclick="window.selectScheduleDate('${item.value}')"
-                             style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 80px; padding: 0.5rem 0.75rem; gap: 2px; height: 55px;">
-                            <span style="font-weight: 700; font-size: 0.95rem; line-height: 1;">${item.display}</span>
-                            <span style="font-size: 0.75rem; color: var(--text-muted); line-height: 1;">${item.label}</span>
-                            ${hasSchedule ? `<span style="position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; background-color: var(--success); border-radius: 50%;"></span>` : ''}
-                        </div>
-                    `}).join('')}
+                            ${separator}
+                            <div class="tab-item ${isActive ? 'active' : ''}" 
+                                 onclick="window.selectScheduleDate('${item.value}')"
+                                 style="padding: 8px 16px; min-width: 100px;">
+                                <div style="font-weight: 700; font-size: 1rem;">${item.display}</div>
+                                <div style="font-size: 0.75rem; opacity: 0.6;">${item.label}</div>
+                                ${hasSchedule ? `<div style="margin-top: 4px; width: 4px; height: 4px; background: var(--success); border-radius: 50%; display: inline-block;"></div>` : ''}
+                            </div>
+                        `;
+        }).join('')}
+                    </div>
                 </div>
-            </div>
 
             <div class="card">
                 <div class="schedule-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem; background: var(--bg); border-radius: 8px;">
@@ -332,7 +305,7 @@ const views = {
                 </div>
 
                 <!-- Room-based Grid (Times as columns, Rooms as rows) -->
-                <div class="room-schedule-grid" style="display: grid; grid-template-columns: 100px repeat(${times.length}, 1fr); gap: 8px; overflow-x: auto;">
+                <div class="room-schedule-grid" style="display: grid; grid-template-columns: 80px repeat(${times.length}, 1fr); gap: 6px; width: 100%;">
                     <!-- Header Row -->
                     <div style="font-weight: 600; padding: 0.75rem 0.5rem; text-align: center; background: var(--card-bg); border-radius: 6px;">Ruangan</div>
                     ${times.map(time => `
@@ -347,13 +320,13 @@ const views = {
                             ${room}
                         </div>
                         ${times.map(time => {
-                const slot = MOCK_DATA.slots.find(s =>
-                    s.date === currentDate &&
-                    s.time === time &&
-                    s.room === room
-                );
+            const slot = MOCK_DATA.slots.find(s =>
+                s.date === currentDate &&
+                s.time === time &&
+                s.room === room
+            );
 
-                return `
+            return `
                                 <div class="room-slot ${slot ? 'slot-filled' : 'slot-empty'}" 
                                      draggable="${slot ? 'true' : 'false'}"
                                      ondragstart="window.onDragStart(event, '${slot?.student || ''}', '${currentDate}', '${time}', '${room}')"
@@ -408,7 +381,7 @@ const views = {
                                     `}
                                 </div>
                             `;
-            }).join('')}
+        }).join('')}
                     `).join('')}
                 </div>
             </div>
@@ -467,7 +440,7 @@ const views = {
             if (data.length > 0) {
                 const filtered = filterData(data, searchTerm);
                 // Default sort by nama if null
-                const sorted = sortData(filtered, sortColumn || 'nama');
+                const sorted = sortData(filtered, sortColumn || 'nama', sortDirection);
 
                 const rows = sorted.map(d => [
                     d.nik, d.status, `<strong>${d.nama}</strong>`, d.kategori, d.nidn, d.jenisKelamin
@@ -485,16 +458,25 @@ const views = {
                 ];
 
                 content = `
-                    <div class="controls-area" style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
-                        <input type="text" id="searchInput" class="search-input" placeholder="Cari..." value="${searchTerm}" oninput="window.handleSearchInput(event)" style="width: 300px;">
-                        <div style="font-size:0.8rem; color:var(--text-muted); display:flex; gap:8px; align-items:center;">
-                            <button onclick="window.exportSDMData()" style="padding: 4px 10px; font-size: 0.75rem; cursor:pointer; background: var(--secondary);">Export CSV</button>
-                            <button onclick="window.triggerImportSDM()" style="padding: 4px 10px; font-size: 0.75rem; cursor:pointer;">Import CSV</button>
+                    <div class="controls-bar">
+                        <div class="search-container">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" 
+                                class="search-input" 
+                                placeholder="Cari data SDM..." 
+                                value="${searchTerm}" 
+                                oninput="window.handleSearchInput(event)">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div class="badge badge-primary" style="padding: 10px 16px;">Total: ${filtered.length} Data</div>
+                            <button onclick="window.triggerImportSDM()" class="btn-secondary" style="padding: 10px 16px;">Import CSV</button>
+                            <button onclick="window.exportSDMData()" class="btn-primary" style="padding: 10px 16px;">Export CSV</button>
                             <input type="file" id="importSDMInput" accept=".csv" style="display:none;" onchange="window.handleImportSDM(event)">
-                            <span style="margin-left:8px;">Total: <strong>${filtered.length}</strong> data</span>
                         </div>
                     </div>
-                    ${renderTable(headers, rows)}
+                    <div style="min-height: 500px;">
+                        ${renderTable(headers, rows)}
+                    </div>
                 `;
             } else {
                 content = `<div class="empty-state"><h3>Memuat Data SDM...</h3></div>`;
@@ -510,8 +492,15 @@ const views = {
                     data = data.filter(d => d.prodi === selectedProdiFilter);
                 }
 
+                // Filter by Status Jadwal
+                if (selectedStatusFilter === 'active') {
+                    data = data.filter(d => !d.exclude);
+                } else if (selectedStatusFilter === 'off') {
+                    data = data.filter(d => d.exclude);
+                }
+
                 const filtered = filterData(data, searchTerm);
-                const sorted = sortData(filtered, sortColumn || 'nomor');
+                const sorted = sortData(filtered, sortColumn || 'nomor', sortDirection);
 
                 const rows = sorted.map(d => {
                     const m = d.matchResult || { matched: false };
@@ -531,17 +520,14 @@ const views = {
                     const isIncluded = !d.exclude;
 
                     const toggleSwitch = `
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-                            <label style="position:relative; display:inline-block; width:36px; height:20px;">
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                            <label class="switch">
                                 <input type="checkbox" ${isIncluded ? 'checked' : ''} 
-                                    onchange="window.toggleDosenScheduling('${faculty}', '${d.nik}')"
-                                    style="opacity:0; width:0; height:0;">
-                                <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:${isIncluded ? 'var(--success)' : '#e5e5ea'}; transition:.4s; border-radius:34px;">
-                                    <span style="position:absolute; content:''; height:16px; width:16px; left:${isIncluded ? '18px' : '2px'}; bottom:2px; background-color:white; transition:.4s; border-radius:50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></span>
-                                </span>
+                                    onchange="window.toggleDosenScheduling('${faculty}', '${d.nik}')">
+                                <span class="slider"></span>
                             </label>
-                            <span style="font-size:0.7rem; color:${isIncluded ? 'var(--success)' : 'var(--text-muted)'}; font-weight:600;">
-                                ${isIncluded ? 'ON' : 'OFF'}
+                            <span style="font-size:0.7rem; color:${isIncluded ? 'var(--success)' : 'var(--text-muted)'}; font-weight:700; letter-spacing:0.02em;">
+                                ${isIncluded ? 'ACTIVE' : 'OFF'}
                             </span>
                         </div>
                     `;
@@ -584,21 +570,38 @@ const views = {
                 const prodis = [...new Set(allFacultyData.map(d => d.prodi).filter(p => p && p !== '-'))].sort();
 
                 content = `
-                    <div class="controls-area" style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
-                        <div style="display: flex; gap: 8px;">
-                             <select onchange="window.handleProdiFilterChange(event)" style="padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 0.9rem;">
-                                 <option value="">Semua Prodi</option>
+                    <div class="controls-bar">
+                        <div style="display: flex; gap: 12px; flex: 1; align-items: center;">
+                             <select onchange="window.handleProdiFilterChange(event)" class="form-select">
+                                 <option value="">Semua Program Studi</option>
                                  ${prodis.map(p => `<option value="${p}" ${selectedProdiFilter === p ? 'selected' : ''}>${p}</option>`).join('')}
                              </select>
-                             <input type="text" id="searchInput" class="search-input" placeholder="Cari dosen ${faculty}..." value="${searchTerm}" oninput="window.handleSearchInput(event)" style="width: 250px;">
+                             <select onchange="window.handleStatusFilterChange(event)" class="form-select" style="max-width: 150px;">
+                                 <option value="all" ${selectedStatusFilter === 'all' ? 'selected' : ''}>Semua Status</option>
+                                 <option value="active" ${selectedStatusFilter === 'active' ? 'selected' : ''}>Hanya Active</option>
+                                 <option value="off" ${selectedStatusFilter === 'off' ? 'selected' : ''}>Hanya OFF</option>
+                             </select>
+                             <div class="search-container" style="max-width: 350px;">
+                                <span class="search-icon">🔍</span>
+                                <input type="text" 
+                                    class="search-input" 
+                                    placeholder="Cari NIK, Nama..." 
+                                    value="${searchTerm}" 
+                                    oninput="window.handleSearchInput(event)">
+                             </div>
                         </div>
-                        <div style="font-size:0.8rem; color:var(--text-muted);">
-                           <button onclick="window.toggleAddDosenModal(true)" style="margin-left:10px; padding: 4px 10px; font-size: 0.75rem; cursor:pointer; background: var(--secondary); margin-right: 5px;">+ Tambah Dosen</button>
-                           <button onclick="processMatching(); window.switchDosenTab('${currentDosenTab}')" style="margin-left:5px; padding: 4px 10px; font-size: 0.75rem; cursor:pointer;">🔄 Force Re-Match</button>
-                           Total: <strong>${filtered.length}</strong> dosen
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                           <div class="badge badge-primary" style="padding: 10px 16px; font-size: 0.85rem;">Total: ${filtered.length} Dosen</div>
+                           ${currentDosenTab === 'sdm' ? `
+                                <button onclick="window.triggerImportSDM()" class="btn-secondary" style="padding: 10px 16px;">Import CSV</button>
+                                <button onclick="window.exportSDMData()" class="btn-primary" style="padding: 10px 16px;">Export CSV</button>
+                           ` : `
+                                <button onclick="window.toggleAddDosenModal(true)" class="btn-primary" style="padding: 10px 18px;">+ Tambah Dosen</button>
+                                <button onclick="window.processMatching(); window.switchDosenTab('${currentDosenTab}')" class="btn-secondary" style="padding: 10px 14px;" title="Refresh Sinkronisasi Data">🔄</button>
+                           `}
                         </div>
                     </div>
-                    <div style="min-height: 400px;">
+                    <div style="min-height: 500px;">
                         ${renderTable(headers, rows)}
                     </div>
                 `;
@@ -614,24 +617,29 @@ const views = {
         }
 
         return `
-            <header>
-                <h1>Data Dosen</h1>
-                <p class="subtitle">Manajemen data dosen per fakultas dan master data SDM.</p>
-            </header>
-            <div class="tabs">
-                ${renderTab('fik', 'Dosen FIK')}
-                ${renderTab('fes', 'Dosen FES')}
-                ${renderTab('fst', 'Dosen FST')}
-                <div style="width: 1px; background-color: var(--border); margin: 0 10px;"></div>
-                ${renderTab('sdm', 'Data SDM')}
-            </div>
-            <div class="content-area">
-                ${content}
+            <div class="container">
+                <header class="page-header">
+                    <div class="header-info">
+                        <h1>Dosen</h1>
+                        <p class="subtitle">Database dan validasi data SDM.</p>
+                    </div>
+                </header>
+
+                <div class="tabs" style="margin-bottom: 2rem;">
+                    ${renderTab('fik', 'Dosen FIK')}
+                    ${renderTab('fes', 'Dosen FES')}
+                    ${renderTab('fst', 'Dosen FST')}
+                    <div style="width: 1px; height: 20px; background: rgba(0,0,0,0.1); margin: auto 12px;"></div>
+                    ${renderTab('sdm', 'Data SDM')}
+                </div>
+
+                <div class="card" style="padding: 1.5rem; background: white;">
+                    ${content}
+                </div>
             </div>
         `;
     },
     mahasiswa: () => {
-        // Filter & Sort
         let data = MOCK_DATA.mahasiswa;
         if (searchTerm) {
             data = filterData(data, searchTerm);
@@ -639,119 +647,111 @@ const views = {
         const sortedMahasiswa = [...data].sort((a, b) => a.nim.localeCompare(b.nim));
 
         return `
-        <header style="display: flex; justify-content: space-between; align-items: center; padding-left: 3.5rem;">
-            <div>
-                <h1>Data Mahasiswa</h1>
-                <p class="subtitle">Pendaftar ujian pendadaran periode aktif.</p>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="window.generateSchedule()" style="background: var(--secondary); white-space: nowrap;">⚡ Proses Jadwal</button>
-                <button onclick="window.toggleAddMahasiswaModal(true)" style="white-space: nowrap;">+ Tambah Mahasiswa</button>
-            </div>
-        </header>
+            <div class="container">
+                <header class="page-header">
+                    <div class="header-info">
+                        <h1>Mahasiswa</h1>
+                        <p class="subtitle">Manajemen peserta sidang pendadaran.</p>
+                    </div>
+                    <div class="header-actions">
+                        <button onclick="window.wipeMahasiswaData()" class="btn-secondary" style="background: rgba(255, 59, 48, 0.1); color: var(--danger); border: 1px solid rgba(255, 59, 48, 0.2); margin-right: 8px;">
+                            🗑️ Hapus Semua
+                        </button>
+                        <button onclick="window.generateSchedule()" class="btn-primary">⚡ Proses Semua Jadwal</button>
+                        <button onclick="window.toggleAddMahasiswaModal(true)" class="btn-secondary">+ Tambah Mahasiswa</button>
+                    </div>
+                </header>
 
-        <div class="card" style="margin-bottom: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div class="stat-item">
-                    <div style="font-size: 0.9rem; color: var(--text-muted);">Total Pendaftar</div>
-                    <div style="font-size: 1.5rem; font-weight: 700;">${sortedMahasiswa.length}</div>
+                <div class="controls-bar">
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" 
+                            class="search-input"
+                            placeholder="Cari NIM, Nama, atau Pembimbing..." 
+                            value="${searchTerm}" 
+                            oninput="window.handleSearchInput(event)">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="badge badge-primary" style="padding: 10px 16px;">Total: ${sortedMahasiswa.length} Peserta</div>
+                    </div>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" 
-                        placeholder="Cari (NIM, Nama, Prodi, Dospem)..." 
-                        value="${searchTerm}" 
-                        oninput="window.handleSearchInput(event)"
-                        style="width: 300px; padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid var(--border); font-size: 0.9rem;">
-                </div>
-            </div>
-        </div>
 
-        <div class="table-container">
-            ${sortedMahasiswa.length > 0 ? `
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 120px;">NIM</th>
-                        <th>Nama Lengkap</th>
-                        <th style="width: 200px;">Program Studi</th>
-                        <th>Dosen Pembimbing</th>
-                        <th style="width: 150px;">Status Penjadwalan</th>
-                        <th style="width: 80px; text-align: center;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${sortedMahasiswa.map(m => {
-            const schedule = MOCK_DATA.slots.find(s => s.student === m.nama);
-            return `
-                        <tr>
-                            <td class="text-truncate" style="font-family: monospace; font-size: 0.95rem;">${m.nim}</td>
-                            <td><div style="font-weight: 600;">${m.nama}</div></td>
-                            <td><span class="badge text-truncate" style="background: var(--bg); border: 1px solid var(--border); color: var(--text-secondary); max-width: 180px; display: inline-block; vertical-align: middle;" title="${m.prodi}">${m.prodi}</span></td>
-                            <td>${m.pembimbing || '<span style="color:var(--text-muted); font-style:italic;">-</span>'}</td>
-                            <td>
-                                ${schedule ? `
-                                    <div onclick="window.viewAndHighlightSchedule('${m.nama}')" 
-                                         style="cursor: pointer; padding: 0.5rem; border-radius: 6px; background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 197, 94, 0.05)); border: 1px solid rgba(34, 197, 94, 0.3); transition: all 0.2s;"
-                                         onmouseover="this.style.background='linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 197, 94, 0.1))'; this.style.borderColor='rgba(34, 197, 94, 0.5)';"
-                                         onmouseout="this.style.background='linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 197, 94, 0.05))'; this.style.borderColor='rgba(34, 197, 94, 0.3)';">
-                                        <div style="font-weight: 600; font-size: 0.85rem; color: var(--success); display: flex; align-items: center; gap: 4px;">
-                                            📅 ${DATES.find(d => d.value === schedule.date)?.display || schedule.date} (${DATES.find(d => d.value === schedule.date)?.label || '-'})
-                                        </div>
-                                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
-                                            ⏰ ${schedule.time} • 🏢 ${schedule.room}
-                                        </div>
-                                        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                            👥 ${schedule.examiners?.slice(0, 2).join(', ')}${schedule.examiners?.length > 2 ? '...' : ''}
-                                        </div>
-                                    </div>
-                                ` : `
-                                    <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
-                                        <span class="badge badge-warning" style="opacity: 0.7;">Belum Terjadwal</span>
-                                        <button onclick="window.scheduleIndividualStudent('${m.nim}')" 
-                                                style="padding: 4px 10px; font-size: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;"
-                                                onmouseover="this.style.background='var(--primary-dark)'; this.style.transform='translateY(-1px)';"
-                                                onmouseout="this.style.background='var(--primary)'; this.style.transform='translateY(0)';"
-                                                title="Jadwalkan mahasiswa ini secara otomatis">
-                                            ⚡ Jadwalkan Otomatis
-                                        </button>
-                                    </div>
-                                `}
-                            </td>
-                            <td style="text-align: center;">
-                                <button onclick="window.deleteMahasiswa('${m.nim}')" style="background: none; border: none; padding: 4px; color: var(--text-muted); cursor: pointer;" title="Hapus">
-                                    🗑️
-                                </button>
-                            </td>
-                        </tr>
-                    `}).join('')}
-                </tbody>
-            </table>
-            ` : `
-            <div class="empty-state" style="padding: 4rem 2rem; text-align: center;">
-                <div style="font-size: 5rem; margin-bottom: 1.5rem; opacity: 0.15; filter: grayscale(100%);">
-                    🎓
+                <div class="table-container">
+                    ${sortedMahasiswa.length > 0 ? `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">NIM</th>
+                                <th>Mahasiswa</th>
+                                <th>Program Studi</th>
+                                <th>Dosen Pembimbing</th>
+                                <th style="width: 220px;">Jadwal Terdaftar</th>
+                                <th style="width: 80px; text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tbody>
+                            ${(() => {
+                    const allDosen = getAllDosen();
+                    return sortedMahasiswa.map(m => {
+                        const schedule = MOCK_DATA.slots.find(s => s.student === m.nama);
+
+                        // Validation Pembimbing
+                        let pembimbingDisplay = m.pembimbing || '-';
+                        if (m.pembimbing) {
+                            const pbData = allDosen.find(d => d.nama === m.pembimbing);
+                            if (!pbData) {
+                                pembimbingDisplay = `<div style="color:var(--text-main);">${m.pembimbing} <span title="Data dosen tidak ditemukan! Mohon cek data dosen." style="color:var(--danger); cursor:help; font-size:0.8rem;">⚠️ (Hilang)</span></div>`;
+                            } else if (pbData.exclude) {
+                                pembimbingDisplay = `<div style="color:var(--text-main);">${m.pembimbing} <span title="Status Dosen OFF (Tidak bisa dijadwalkan)" class="badge badge-danger" style="font-size:0.6rem; vertical-align:middle; margin-left:4px;">OFF</span></div>`;
+                            } else {
+                                pembimbingDisplay = `<div style="font-weight: 500;">${m.pembimbing}</div>`;
+                            }
+                        }
+
+                        return `
+                                <tr>
+                                    <td><div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted);">${m.nim}</div></td>
+                                    <td><div style="font-weight: 700; color: var(--text-main);">${m.nama}</div></td>
+                                    <td><span class="badge" style="background: #f0f0f5; color: #555;">${m.prodi}</span></td>
+                                    <td>${pembimbingDisplay}</td>
+                                    <td>
+                                        ${schedule ? `
+                                            <div onclick="window.viewAndHighlightSchedule('${m.nama}')" 
+                                                 style="cursor: pointer; padding: 10px 14px; border-radius: 12px; background: #e8f5e9; border: 1px solid #c8e6c9; transition: all 0.2s;"
+                                                 onmouseover="this.style.background='#def2e1'" onmouseout="this.style.background='#e8f5e9'">
+                                                <div style="font-weight: 700; font-size: 0.85rem; color: #2e7d32; display: flex; align-items: center; gap: 6px;">
+                                                    📅 ${DATES.find(d => d.value === schedule.date)?.display || schedule.date}
+                                                </div>
+                                                <div style="font-size: 0.75rem; color: #666; margin-top: 4px; font-weight: 500;">${schedule.time} • Room ${schedule.room}</div>
+                                            </div>
+                                        ` : `
+                                            <button onclick="window.scheduleIndividualStudent('${m.nim}')" 
+                                                    class="btn-secondary" style="font-size: 0.8rem; width: 100%; border: 1px dashed var(--primary); color: var(--primary); background: transparent;">
+                                                ⚡ Jadwal Otomatis
+                                            </button>
+                                        `}
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <button onclick="window.deleteMahasiswa('${m.nim}')" style="background: transparent; color: var(--danger); font-size: 1.1rem; padding: 4px;">🗑️</button>
+                                    </td>
+                                </tr>
+                            `}).join('');
+                })()}
+                        </tbody>
+                    </table>
+                    ` : `
+                    <div style="padding: 6rem 2rem; text-align: center; background: white;">
+                        <div style="font-size: 4rem; margin-bottom: 2rem; opacity: 0.2;">🎓</div>
+                        <h3 style="color: var(--text-muted); font-weight: 500;">Belum ada data mahasiswa terdaftar</h3>
+                        <button onclick="window.toggleAddMahasiswaModal(true)" style="margin-top: 1.5rem;" class="btn-primary">+ Tambah Mahasiswa</button>
+                    </div>
+                    `}
                 </div>
-                <h3 style="margin-bottom: 0.75rem; color: var(--text-main); font-size: 1.5rem; font-weight: 700;">
-                    Belum Ada Data Mahasiswa
-                </h3>
-                <p style="color: var(--text-muted); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.6; font-size: 0.95rem;">
-                    Tambahkan data mahasiswa yang akan mengikuti ujian pendadaran.<br>
-                    Anda dapat menambahkan data secara manual satu per satu.
-                </p>
-                <button onclick="window.toggleAddMahasiswaModal(true)" 
-                        style="padding: 0.875rem 2rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 16px rgba(94, 92, 230, 0.3); transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;"
-                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(94, 92, 230, 0.4)';"
-                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(94, 92, 230, 0.3)';">
-                    <span style="font-size: 1.2rem;">+</span>
-                    <span>Tambah Mahasiswa Pertama</span>
-                </button>
             </div>
-            `}
-        </div>
         `;
     },
     libur: () => {
-        // Helper to format constraint description
         const renderConstraint = (l) => {
             if (!l.type || l.type === 'date') {
                 const dObj = DATES.find(d => d.value === l.date);
@@ -771,153 +771,326 @@ const views = {
         };
 
         return `
-        <header style="display: flex; justify-content: space-between; align-items: center; padding-left: 3.5rem;">
-            <div>
-                <h1>Manajemen Ketersediaan Dosen</h1>
-                <p class="subtitle">Atur jadwal kapan dosen <b>TIDAK BISA</b> menguji (Cuti, Mengajar, dll).</p>
-            </div>
-            <button onclick="window.toggleAddLiburModal(true)">+ Tambah Aturan Baru</button>
-        </header>
+            <div class="container">
+                <header class="page-header">
+                    <div class="header-info">
+                        <h1>Ketersediaan</h1>
+                        <p class="subtitle">Pengaturan absensi dan waktu libur.</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="window.resetLiburData()" class="btn-secondary" style="background:rgba(255, 59, 48, 0.1); color:var(--danger); border:1px solid rgba(255,59,48,0.2);">
+                            🗑️ Reset Default
+                        </button>
+                        <button onclick="window.toggleAddLiburModal(true)" class="btn-primary">+ Tambah Aturan Baru</button>
+                    </div>
+                </header>
 
-        <div class="card" style="margin-bottom: 2rem;">
-            <div style="background: var(--bg-subtle); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); font-size: 0.9rem; margin-bottom: 1.5rem;">
-                <strong>ℹ️ Tips:</strong><br>
-                - Gunakan <b>Rentang Tanggal</b> untuk cuti panjang.<br>
-                - Gunakan <b>Aturan Rutin</b> untuk dosen yang hanya bisa menguji di hari tertentu (misal: "Blokir Senin & Kamis").<br>
-                - Jika dosen "Hanya Bisa Selasa", maka buat aturan Rutin untuk memblokir Senin, Rabu, Kamis, Jumat.
-            </div>
+                <div class="card" style="background: #fffdf2; border: 1px solid #ffe082; padding: 1.5rem 2rem; border-radius: 20px;">
+                    <div style="display: flex; gap: 1.25rem; align-items: center;">
+                        <div style="font-size: 2rem;">💡</div>
+                        <div style="font-size: 1rem; line-height: 1.6; color: #795548; font-weight: 500;">
+                            <strong>Tips Penjadwalan:</strong> Gunakan <b>Aturan Rutin</b> untuk memblokir hari tertentu setiap minggu. 
+                            Dosen dengan status <span class="badge badge-danger" style="font-size:0.7rem;">OFF</span> di Data Dosen otomatis tidak akan diberikan jadwal.
+                        </div>
+                    </div>
+                </div>
 
-            <div class="table-container">
-            ${MOCK_DATA.libur.length > 0 ? `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nama Dosen</th>
-                            <th>Jenis Aturan</th>
-                            <th>Keterangan / Alasan</th>
-                            <th style="text-align:center;">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${MOCK_DATA.libur.map((l, index) => {
-            const dosen = getAllDosen().find(d => d.nik === l.dosenId);
-            const namaDosen = dosen ? `<strong>${dosen.nama}</strong><br><span style="font-size:0.8rem; color:var(--text-muted);">${dosen.prodi}</span>` : `<span style="color:red;">Dosen Hapus (${l.dosenId})</span>`;
+                <div class="table-container">
+                    ${MOCK_DATA.libur.length > 0 ? `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nama Dosen</th>
+                                    <th>Jenis Aturan</th>
+                                    <th>Keterangan / Alasan</th>
+                                    <th style="text-align:center;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${MOCK_DATA.libur.map((l, index) => {
+            // Logic Lookup Dosen (Support ID atau Nama)
+            // Prioritas: 1. Lookup by ID, 2. Lookup by Name, 3. Fallback name
+            let dosen = null;
+            let displayNama = '';
+
+            if (l.dosenId) {
+                // Legacy: Lookup by NIK/ID
+                dosen = getAllDosen().find(d => d.nik === l.dosenId);
+                displayNama = dosen ? dosen.nama : `<span style="color:red;">Unknown ID (${l.dosenId})</span>`;
+            } else if (l.nama) {
+                // New: Lookup by Name string
+                // Normalisasi nama (trim) untuk pencarian
+                const searchName = l.nama.trim();
+                dosen = getAllDosen().find(d => d.nama.trim() === searchName);
+                displayNama = dosen ? dosen.nama : l.nama; // Fallback ke nama text jika tidak ketemu object dosennya
+            }
+
+            const htmlNama = dosen
+                ? `<strong>${dosen.nama}</strong><br><span style="font-size:0.8rem; color:var(--text-muted);">${dosen.prodi}</span>`
+                : `<strong>${displayNama}</strong><br><span style="font-size:0.8rem; color: #f59e0b;">(Data Dosen Tidak Ditemukan)</span>`;
 
             return `
-                                <tr>
-                                    <td>${namaDosen}</td>
-                                    <td>${renderConstraint(l)}</td>
-                                    <td>${l.reason}</td>
-                                    <td style="text-align: center;">
-                                        <button onclick="window.deleteLibur(${index})" style="color: var(--danger); background: none; border: none; cursor: pointer;" title="Hapus Aturan">🗑️</button>
-                                    </td>
-                                </tr>
-                            `;
+                                        <tr>
+                                            <td>${htmlNama}</td>
+                                            <td>${renderConstraint(l)}</td>
+                                            <td>${l.reason}</td>
+                                            <td style="text-align: center;">
+                                                <button onclick="window.toggleAddLiburModal(true, ${index})" style="color: var(--primary); background: none; border: none; cursor: pointer; margin-right: 8px;" title="Edit Aturan">✏️</button>
+                                                <button onclick="window.deleteLibur(${index})" style="color: var(--danger); background: none; border: none; cursor: pointer;" title="Hapus Aturan">🗑️</button>
+                                            </td>
+                                        </tr>
+                                    `;
         }).join('')}
-                    </tbody>
-                </table>
-            ` : `
-                <div class="empty-state" style="padding: 4rem 2rem; text-align: center;">
-                    <div style="font-size: 5rem; margin-bottom: 1.5rem; opacity: 0.15; filter: grayscale(100%);">
-                        📅
-                    </div>
-                    <h3 style="margin-bottom: 0.75rem; color: var(--text-main); font-size: 1.5rem; font-weight: 700;">
-                        Belum Ada Aturan Ketersediaan
-                    </h3>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem; max-width: 550px; margin-left: auto; margin-right: auto; line-height: 1.6; font-size: 0.95rem;">
-                        Semua dosen dianggap <strong style="color: var(--success);">TERSEDIA</strong> setiap saat kecuali jika ada jadwal bentrok.<br>
-                        Tambahkan aturan ketersediaan untuk mengatur waktu libur atau ketidaktersediaan dosen.
-                    </p>
-                    <button onclick="window.toggleAddLiburModal(true)" 
-                            style="padding: 0.875rem 2rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 16px rgba(94, 92, 230, 0.3); transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;"
-                            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(94, 92, 230, 0.4)';"
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(94, 92, 230, 0.3)';">
-                        <span style="font-size: 1.2rem;">+</span>
-                        <span>Tambah Aturan Pertama</span>
-                    </button>
+                            </tbody>
+                        </table>
+                    ` : `
+                        <div class="empty-state" style="padding: 4rem 2rem; text-align: center;">
+                            <div style="font-size: 5rem; margin-bottom: 1.5rem; opacity: 0.15; filter: grayscale(100%);">
+                                📅
+                            </div>
+                            <h3 style="margin-bottom: 0.75rem; color: var(--text-main); font-size: 1.5rem; font-weight: 700;">
+                                Belum Ada Aturan Ketersediaan
+                            </h3>
+                            <p style="color: var(--text-muted); margin-bottom: 2rem; max-width: 550px; margin-left: auto; margin-right: auto; line-height: 1.6; font-size: 0.95rem;">
+                                Semua dosen dianggap <strong style="color: var(--success);">TERSEDIA</strong> setiap saat kecuali jika ada jadwal bentrok.<br>
+                                Tambahkan aturan ketersediaan untuk mengatur waktu libur atau ketidaktersediaan dosen.
+                            </p>
+                            <button onclick="window.toggleAddLiburModal(true)" class="btn-primary">
+                                <span style="font-size: 1.2rem;">+</span>
+                                <span>Tambah Aturan Pertama</span>
+                            </button>
+                        </div>
+                    `}
                 </div>
-            `}
             </div>
-        </div>
         `;
     },
     logic: () => `
-        <header>
-            <h1>Eksplorasi Logika</h1>
-            <p class="subtitle">Kendalikan algoritma penjadwalan otomatis secara presisi.</p>
-        </header>
-        <div class="grid-container">
-            <div class="card">
-                <h3>Aturan Aktif (Hard Constraints)</h3>
-                <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
-                    Algoritma saat ini memverifikasi aturan berikut secara ketat:
-                </p>
-                
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="badge badge-success">WAJIB</span>
-                        <span><strong>Ruangan Kosong:</strong> Tidak ada jadwal ganda di ruangan & waktu yang sama.</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="badge badge-success">WAJIB</span>
-                        <span><strong>Dosen Available:</strong> Pembimbing & Penguji tidak sedang menguji di tempat lain.</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="badge badge-success">WAJIB</span>
-                        <span><strong>Status Dosen:</strong> Dosen yang di-set "OFF" (Jadwalkan: OFF) diabaikan sepenuhnya.</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="badge badge-success">WAJIB</span>
-                        <span><strong>Komposisi Tim:</strong> 1 Pembimbing + 2 Penguji Pendamping (unik, tidak boleh sama).</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="badge badge-success">WAJIB</span>
-                        <span><strong>Jam Operasional:</strong> 08:30, 10:00, 11:30, 13:30 (Jumat: skip 11:30).</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="badge badge-warning">OPSIONAL</span>
-                        <span><strong>Distribusi Merata:</strong> Maksimal ${MAX_EXAMINER_ASSIGNMENTS} tugas per dosen (kecuali pembimbing wajib).</span>
-                    </div>
-                </div>
-            </div>
+        <div class="container" style="max-width: 100%; padding: 0 1.5rem 1.5rem 1.5rem; height: calc(100vh - 100px); display: flex; flex-direction: column;">
             
-            <div class="card">
-                <h3>Metode Algoritma</h3>
-                <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem;">
-                    <strong>Sequential Greedy Search</strong>
-                </p>
-                <p style="font-size: 0.9rem; line-height: 1.6;">
-                    Sistem melakukan iterasi pada setiap mahasiswa antrian, lalu melakukan <em>brute-force search</em> untuk mencari slot waktu & ruangan pertama yang memenuhi <strong>SEMUA</strong> aturan di samping.
-                </p>
-                <p style="font-size: 0.9rem; line-height: 1.6; margin-top: 10px;">
-                    Jika slot ditemukan, jadwal langsung dikunci (booked). Jika tidak, mahasiswa akan dilaporkan GAGAL dijadwalkan.
-                </p>
+            <!-- 1. UNIFIED COMMAND BAR (Top) -->
+            <div style="
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                background: rgba(255, 255, 255, 0.8); 
+                backdrop-filter: blur(20px); 
+                -webkit-backdrop-filter: blur(20px);
+                padding: 0.75rem 1rem; 
+                border-radius: 16px; 
+                border: 1px solid rgba(255,255,255,0.4);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+                margin-bottom: 1rem;
+                flex-shrink: 0;
+            ">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.2rem;">⚙️</span>
+                        <h2 style="font-size: 1rem; margin: 0; font-weight: 700; color: var(--text-main);">Logic Control</h2>
+                    </div>
+                    
+                    <div style="width: 1px; height: 24px; background: var(--border); margin: 0 4px;"></div>
+
+                    <!-- Scope Filter -->
+                    <select id="scheduleScope" style="
+                        background: rgba(0,0,0,0.04); 
+                        border: none; 
+                        padding: 8px 12px; 
+                        border-radius: 8px; 
+                        font-family: inherit; 
+                        font-size: 0.85rem; 
+                        color: var(--text-main); 
+                        font-weight: 500;
+                        outline: none;
+                        cursor: pointer;
+                        min-width: 180px;
+                    ">
+                        <option value="all">Semua Mahasiswa (${MOCK_DATA.mahasiswa.length})</option>
+                        ${[...new Set(MOCK_DATA.mahasiswa.map(m => m.prodi))].sort().map(p =>
+        `<option value="${p}">${p}</option>`
+    ).join('')}
+                    </select>
+
+                    <!-- Incremental Toggle Pill -->
+                    <label style="
+                        display: flex; 
+                        align-items: center; 
+                        gap: 8px; 
+                        background: rgba(0,0,0,0.04); 
+                        padding: 6px 12px; 
+                        border-radius: 20px; 
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    " onmouseover="this.style.background='rgba(0,0,0,0.08)'" onmouseout="this.style.background='rgba(0,0,0,0.04)'">
+                        <input type="checkbox" id="incrementalMode" style="accent-color: var(--primary); transform: scale(1.1);">
+                        <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Incremental Mode</span>
+                    </label>
+                </div>
+
+                <!-- Run Button -->
+                <button onclick="window.generateSchedule()" 
+                        class="btn-primary"
+                        style="
+                            padding: 0.6rem 1.5rem; 
+                            font-size: 0.9rem; 
+                            display: flex; 
+                            align-items: center; 
+                            gap: 8px; 
+                            border-radius: 10px;
+                            box-shadow: 0 4px 12px var(--primary-subtle);
+                        ">
+                    <span style="font-size: 1rem;">▶</span> JALANKAN ENGINE
+                </button>
             </div>
 
-            <div class="card stat-card" style="grid-column: span 2; background: linear-gradient(90deg, var(--card-bg), var(--primary-glow));">
-                <span class="stat-label">Algoritma Aktif</span>
-                <span class="stat-value">Genetic Algorithm v2.4</span>
-                <p style="font-size: 0.875rem; margin-top: 1rem;">
-                    Status: <span style="color: #4ade80;">Siap untuk optimasi</span>
-                </p>
-                <button onclick="window.generateSchedule()" style="margin-top: 1rem; padding: 0.75rem; border-radius: 8px; border: none; background: var(--secondary); color: white; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 4px 12px rgba(94, 92, 230, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(94, 92, 230, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(94, 92, 230, 0.3)';">GENERATE ULANG JADWAL</button>
-            </div>
-            
-            <div class="card" style="grid-column: span 2; display: none;" id="logCard">
-                <h3>Log Proses Algoritma</h3>
-                <div id="logicLog" style="margin-top: 0.5rem; padding: 1rem; background: #1e1e1e; color: #4ade80; font-family: 'JetBrains Mono', monospace; height: 300px; overflow-y: auto; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap;"></div>
+            <!-- 2. DASHBOARD GRID (Main Content) -->
+            <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 1rem; flex: 1; overflow: hidden;">
+                
+                <!-- LEFT COLUMN: Terminal (Takes most space) -->
+                <div class="card" style="
+                    background: #1e1e1e; 
+                    padding: 0; 
+                    border: 1px solid #333; 
+                    display: flex; 
+                    flex-direction: column; 
+                    overflow: hidden;
+                    box-shadow: var(--shadow-md);
+                ">
+                    <!-- Terminal Header -->
+                    <div style="
+                        display: flex; 
+                        justify-content: space-between; 
+                        align-items: center; 
+                        padding: 0.6rem 1rem; 
+                        background: #252526; 
+                        border-bottom: 1px solid #333;
+                    ">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #ccc; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">root@scheduler:~/runtime_logs</span>
+                        </div>
+                        <button onclick="document.getElementById('logicLog').innerHTML = ''" 
+                                style="background: transparent; border: 1px solid #444; color: #888; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; cursor: pointer;">
+                            CLEAR
+                        </button>
+                    </div>
+
+                    <!-- Terminal Body -->
+                    <div id="logicLog" style="
+                        flex: 1; 
+                        overflow-y: auto; 
+                        padding: 1rem; 
+                        font-family: 'JetBrains Mono', 'Consolas', monospace; 
+                        font-size: 0.85rem; 
+                        line-height: 1.6; 
+                        color: #d4d4d4;
+                    ">
+                        <div style="opacity: 0.5;">Waiting for command...</div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Inspector Sidebar -->
+                <div style="display: flex; flex-direction: column; gap: 1rem; overflow-y: auto;">
+                    
+                    <!-- Status Card -->
+                    <div class="card" style="padding: 1.25rem;">
+                        <h3 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 0.5rem;">System Status</h3>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 12px; height: 12px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success);"></div>
+                            <span style="font-weight: 700; font-size: 1.1rem; color: var(--text-main);">ENGINE IDLE</span>
+                        </div>
+                    </div>
+
+                    <!-- Constraints -->
+                    <div class="card" style="padding: 1.25rem; flex: 1;">
+                        <h3 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 1rem;">Active Constraints</h3>
+                        
+                            <!-- Section: Hard Constraints (Wajib) -->
+                            <div style="margin-bottom: 0.5rem;">
+                                <div style="font-size: 0.7rem; font-weight: 800; color: var(--danger); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                                    <span style="display: block; width: 6px; height: 6px; background: var(--danger); border-radius: 50%;"></span>
+                                    ATURAN WAJIB (HARD)
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 8px; padding-left: 10px; border-left: 2px solid rgba(255, 59, 48, 0.1);">
+                                    
+                                    <div style="display: flex; gap: 8px; align-items: start;">
+                                        <div style="color: var(--success); font-size: 0.8rem;">✓</div>
+                                        <div>
+                                            <div style="font-size: 0.8rem; font-weight: 600;">Anti-Double Booking</div>
+                                            <div style="font-size: 0.7rem; opacity: 0.7;">Dosen tidak boleh menguji ditempat lain di waktu yang sama.</div>
+                                        </div>
+                                    </div>
+
+                                    <div style="display: flex; gap: 8px; align-items: start;">
+                                        <div style="color: var(--success); font-size: 0.8rem;">✓</div>
+                                        <div>
+                                            <div style="font-size: 0.8rem; font-weight: 600;">Dosen Availability</div>
+                                            <div style="font-size: 0.7rem; opacity: 0.7;">Cek ketersediaan hari dosen (Libur/Off).</div>
+                                        </div>
+                                    </div>
+
+                                    <div style="display: flex; gap: 8px; align-items: start;">
+                                        <div style="color: var(--success); font-size: 0.8rem;">✓</div>
+                                        <div>
+                                            <div style="font-size: 0.8rem; font-weight: 600;">Prodi Matching</div>
+                                            <div style="font-size: 0.7rem; opacity: 0.7;">Penguji FES vs FST harus sesuai prodi mahasiswa.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Soft Constraints (Opsional/Optimasi) -->
+                            <div style="margin-top: 1rem;">
+                                <div style="font-size: 0.7rem; font-weight: 800; color: var(--warning); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                                    <span style="display: block; width: 6px; height: 6px; background: var(--warning); border-radius: 50%;"></span>
+                                    OPTIMASI (SOFT)
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 8px; padding-left: 10px; border-left: 2px solid rgba(255, 159, 10, 0.1);">
+                                    
+                                    <div style="display: flex; gap: 8px; align-items: start;">
+                                        <div style="color: var(--warning); font-size: 0.8rem;">⚖️</div>
+                                        <div>
+                                            <div style="font-size: 0.8rem; font-weight: 600;">Fair Load Balancing</div>
+                                            <div style="font-size: 0.7rem; opacity: 0.7;">Prioritas dosen dengan beban terendah (Least-Loaded First) agar rata.</div>
+                                        </div>
+                                    </div>
+
+                                    <div style="display: flex; gap: 8px; align-items: start;">
+                                        <div style="color: var(--warning); font-size: 0.8rem;">⚡</div>
+                                        <div>
+                                            <div style="font-size: 0.8rem; font-weight: 600;">Sequential Filling</div>
+                                            <div style="font-size: 0.7rem; opacity: 0.7;">Mengisi slot pagi terlebih dahulu sebelum sore.</div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
+                            <h3 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 0.5rem;">Algorithm</h3>
+                            <div style="font-family: monospace; font-size: 0.8rem; background: var(--bg); padding: 8px; border-radius: 6px;">
+                                fair_greedy_allocator_v3
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
-    `,
+`,
+
 };
 
 function navigate(page) {
     currentView = page;
+    appState.currentView = page;
     // Reset searching and sorting when navigating away from dosen page
     if (page !== 'dosen') {
         sortColumn = null;
+        appState.sortColumn = null;
         sortDirection = 'asc';
+        appState.sortDirection = 'asc';
         searchTerm = '';
+        appState.searchTerm = '';
     }
 
     // Update Active Link
@@ -930,17 +1103,33 @@ function navigate(page) {
     });
 
     // Render Content
-    if (views[page]) {
-        mainContent.innerHTML = views[page]();
+    if (views && views[page]) {
+        try {
+            const html = views[page]();
+            if (mainContent) {
+                mainContent.innerHTML = html;
+            } else {
+                console.error('mainContent element not found!');
+            }
+        } catch (err) {
+            console.error('Error rendering view:', page, err);
+            if (mainContent) mainContent.innerHTML = `<div class="container"><div class="card"><h2>Error Rendering Page</h2><p>${err.message}</p></div></div>`;
+        }
+    } else {
+        console.error('View not found or views not defined:', page);
     }
 }
 
 // Global function for tab switching
 window.switchDosenTab = (tabId) => {
     currentDosenTab = tabId;
+    appState.currentDosenTab = tabId;
     sortColumn = null;  // Reset sorting when switching tabs
+    appState.sortColumn = null;
     sortDirection = 'asc';
+    appState.sortDirection = 'asc';
     searchTerm = ''; // Reset search when switching tabs
+    appState.searchTerm = '';
     if (currentView === 'dosen') {
         mainContent.innerHTML = views.dosen();
     }
@@ -957,9 +1146,15 @@ window.sortTable = (column) => {
         sortDirection = 'asc';
     }
 
+    // Sync to appState for helpers
+    appState.sortColumn = sortColumn;
+    appState.sortDirection = sortDirection;
+
     // Re-render the dosen view with sorted data
     if (currentView === 'dosen') {
         mainContent.innerHTML = views.dosen();
+    } else if (currentView === 'mahasiswa') {
+        mainContent.innerHTML = views.mahasiswa();
     }
 };
 
@@ -977,6 +1172,7 @@ window.performSearch = () => {
 // Real-time search saat mengetik
 window.handleSearchInput = (e) => {
     searchTerm = e.target.value;
+    appState.searchTerm = searchTerm; // Sync
     // Debounce untuk performa lebih baik
     clearTimeout(window.searchTimeout);
     window.searchTimeout = setTimeout(() => {
@@ -1151,6 +1347,9 @@ window.toggleAddDosenModal = (show) => {
         const modalContainer = document.createElement('div');
         modalContainer.id = 'addDosenModal';
         modalContainer.className = 'modal-overlay';
+        modalContainer.onclick = (e) => {
+            if (e.target.id === 'addDosenModal') window.toggleAddDosenModal(false);
+        };
 
         // Initial View: Search SDM
         renderModalContent(modalContainer, 'search');
@@ -1173,7 +1372,7 @@ function renderModalContent(container, mode) {
                 <h2 style="margin-bottom: 1rem;">Tambah Dosen ke ${currentDosenTab.toUpperCase()}</h2>
                 <div style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center;">
                     <p class="subtitle" style="margin:0;">Cari dari Database SDM (Disarankan)</p>
-                    <button class="btn-secondary" style="font-size:0.75rem; padding:4px 8px;" onclick="switchModalMode('manual')">Input Manual ➝</button>
+                    <button class="btn-secondary" style="font-size:0.75rem; padding:4px 8px;" onclick="window.switchModalMode('manual')">Input Manual ➝</button>
                 </div>
                 
                 <div class="form-group">
@@ -1223,7 +1422,8 @@ function renderModalContent(container, mode) {
                         </select>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn-secondary" onclick="switchModalMode('search')">⬅ Kembali ke Cari</button>
+                        <button type="button" class="btn-secondary" onclick="window.switchModalMode('search')">⬅ Kembali ke Cari</button>
+                        <button type="button" class="btn-secondary" onclick="window.toggleAddDosenModal(false)">Batal</button>
                         <button type="submit">Simpan Manual</button>
                     </div>
                 </form>
@@ -1280,6 +1480,16 @@ window.deleteDosen = (faculty, nik) => {
     // }
 };
 
+window.wipeMahasiswaData = () => {
+    if (confirm('⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data mahasiswa?\n\n(Database akan di-reset ke data awal mahasiswa)')) {
+        MOCK_DATA.mahasiswa = [];
+        MOCK_DATA.slots = []; // Clear schedules too
+        saveMahasiswaToStorage();
+        alert('✅ Database mahasiswa berhasil dibersihkan. Halaman akan dimuat ulang.');
+        window.location.reload();
+    }
+};
+
 // --- Fitur Data Mahasiswa ---
 
 window.toggleAddMahasiswaModal = (show) => {
@@ -1298,7 +1508,11 @@ window.toggleAddMahasiswaModal = (show) => {
             ...(MOCK_DATA.facultyData.FIK || []),
             ...(MOCK_DATA.facultyData.FES || []),
             ...(MOCK_DATA.facultyData.FST || [])
-        ].sort((a, b) => a.nama.localeCompare(b.nama));
+        ].sort((a, b) => {
+            const nameA = a.nama || "";
+            const nameB = b.nama || "";
+            return nameA.localeCompare(nameB);
+        });
 
         const dosenOptions = allDosen.map(d => `<option value="${d.nama}">${d.nama}</option>`).join('');
 
@@ -1701,27 +1915,113 @@ navItems.forEach(item => {
     });
 });
 
-// Attach functions to window explicitly to prevent scope issues
-window.toggleAddDosenModal = window.toggleAddDosenModal;
-window.saveNewDosen = window.saveNewDosen;
-window.exportSDMData = window.exportSDMData;
-window.triggerImportSDM = window.triggerImportSDM;
-window.handleImportSDM = window.handleImportSDM;
-window.switchModalMode = window.switchModalMode;
-window.handleSDMSearchInModal = window.handleSDMSearchInModal;
-window.addDosenFromSDM = window.addDosenFromSDM;
+// --- SDM Import/Export Implementation ---
+
+window.triggerImportSDM = () => {
+    const input = document.getElementById('importSDMInput');
+    if (input) input.click();
+};
+
+window.handleImportSDM = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        const text = await file.text();
+        const data = importSDM(text); // Using the local helper
+
+        if (data && data.length > 0) {
+            MOCK_DATA.masterDosen = data;
+            console.log(`✅ Imported ${data.length} SDM records manually.`);
+            alert(`Berhasil mengimpor ${data.length} data SDM.`);
+
+            // Re-run matching logic with new SDM data
+            processMatching();
+
+            // Refresh view if needed
+            if (currentView === 'dosen') {
+                const mainContent = document.getElementById('main-content');
+                if (mainContent) mainContent.innerHTML = views.dosen();
+            }
+        } else {
+            alert('Gagal membaca data CSV. Pastikan format sesuai (delimiter ; atau ,).');
+        }
+    } catch (err) {
+        console.error('Import Error:', err);
+        alert('Terjadi kesalahan saat membaca file.');
+    }
+    // Reset input
+    event.target.value = '';
+};
+
+window.exportSDMData = () => {
+    const data = MOCK_DATA.masterDosen;
+    if (!data || data.length === 0) {
+        alert('Belum ada data SDM untuk diekspor.');
+        return;
+    }
+
+    // Header matching importSDM expectation
+    const headers = ['No', 'Nik', 'Status', 'Nama', 'Kategori', 'NIDN', 'Jenis Kelamin'];
+
+    const csvContent = [
+        headers.join(';'),
+        ...data.map(d => [
+            d.no || '',
+            d.nik || '',
+            d.status || 'DOSEN',
+            d.nama || '',
+            d.kategori || '',
+            d.nidn || '',
+            d.jenisKelamin || ''
+        ].join(';'))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'Data_SDM_Export.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+// Ensure processMatching is attached/exposed
+window.processMatching = processMatching;
 
 
 
 
 // --- Fitur Dosen Libur ---
 
-window.toggleAddLiburModal = (show) => {
+window.toggleAddLiburModal = (show, editIndex = null) => {
     const modalId = 'addLiburModal';
     let modal = document.getElementById(modalId);
 
     if (show) {
         if (modal) modal.remove();
+
+        // --- PREPARE EDIT DATA ---
+        const isEdit = (editIndex !== null && editIndex !== undefined);
+        const editData = isEdit ? MOCK_DATA.libur[editIndex] : {};
+        const Defaults = {
+            dosenId: '',
+            type: 'date',
+            date: '',
+            start: '',
+            end: '',
+            days: [],
+            times: [],
+            reason: ''
+        };
+        const Data = { ...Defaults, ...editData };
+
+        // Resolve Dosen ID from Name if needed (Migration support for initialLibur.js which uses names)
+        if (!Data.dosenId && Data.nama) {
+            const d = getAllDosen().find(x => x.nama.trim() === Data.nama.trim());
+            if (d) Data.dosenId = d.nik;
+        }
 
         const modalContainer = document.createElement('div');
         modalContainer.id = modalId;
@@ -1738,19 +2038,25 @@ window.toggleAddLiburModal = (show) => {
             }
         }
 
-        const dosenOptions = uniqueDosen.map(d => `<option value="${d.nik}">${d.nama}</option>`).join('');
+        const dosenOptions = uniqueDosen.map(d =>
+            `<option value="${d.nik}" ${d.nik === Data.dosenId ? 'selected' : ''}>${d.nama}</option>`
+        ).join('');
 
-        // Date Options (Use DATES constant)
-        const dateOptions = DATES.map(d => `<option value="${d.value}">${d.display} (${d.label})</option>`).join('');
+        // Date Options (Helper)
+        const renderDateOpts = (selected) => DATES.map(d =>
+            `<option value="${d.value}" ${d.value === selected ? 'selected' : ''}>${d.display} (${d.label})</option>`
+        ).join('');
 
         modalContainer.innerHTML = `
             <div class="modal-content" style="max-width: 550px;">
-                <h2 style="margin-bottom: 1rem;">Tambah Aturan Ketersediaan</h2>
+                <h2 style="margin-bottom: 1rem;">${isEdit ? 'Edit Aturan' : 'Tambah Aturan Ketersediaan'}</h2>
                 <form onsubmit="window.saveNewLibur(event)">
+                    <input type="hidden" name="editIndex" value="${isEdit ? editIndex : -1}">
+                    
                     <div class="form-group">
                         <label class="form-label">Dosen</label>
                         <select name="dosenId" class="form-input" required>
-                             <option value="" disabled selected>Pilih Dosen...</option>
+                             <option value="" disabled ${!Data.dosenId ? 'selected' : ''}>Pilih Dosen...</option>
                              ${dosenOptions}
                         </select>
                     </div>
@@ -1758,9 +2064,9 @@ window.toggleAddLiburModal = (show) => {
                     <div class="form-group">
                         <label class="form-label">Tipe Aturan</label>
                         <select id="ruleType" name="type" class="form-input" onchange="window.handleRuleTypeChange(this.value)">
-                             <option value="date" selected>📅 Tanggal Spesifik (Cuti Sehari)</option>
-                             <option value="range">📆 Rentang Tanggal (Cuti Panjang)</option>
-                             <option value="recurring">🔄 Aturan Rutin (Hari/Jam Tertentu)</option>
+                             <option value="date" ${Data.type === 'date' ? 'selected' : ''}>📅 Tanggal Spesifik (Cuti Sehari)</option>
+                             <option value="range" ${Data.type === 'range' ? 'selected' : ''}>📆 Rentang Tanggal (Cuti Panjang)</option>
+                             <option value="recurring" ${Data.type === 'recurring' ? 'selected' : ''}>🔄 Aturan Rutin (Hari/Jam Tertentu)</option>
                         </select>
                     </div>
 
@@ -1768,7 +2074,7 @@ window.toggleAddLiburModal = (show) => {
                     <div id="inputDate" class="form-group rule-input">
                         <label class="form-label">Pilih Tanggal</label>
                         <select name="date" class="form-input">
-                             ${dateOptions}
+                             ${renderDateOpts(Data.date)}
                         </select>
                     </div>
 
@@ -1776,11 +2082,11 @@ window.toggleAddLiburModal = (show) => {
                     <div id="inputRange" class="form-group rule-input" style="display:none; gap: 10px;">
                         <div style="flex:1;">
                             <label class="form-label">Dari Tanggal</label>
-                            <select name="start" class="form-input">${dateOptions}</select>
+                            <select name="start" class="form-input">${renderDateOpts(Data.start)}</select>
                         </div>
                         <div style="flex:1;">
                             <label class="form-label">Sampai Tanggal</label>
-                            <select name="end" class="form-input">${dateOptions}</select>
+                            <select name="end" class="form-input">${renderDateOpts(Data.end)}</select>
                         </div>
                     </div>
 
@@ -1790,16 +2096,16 @@ window.toggleAddLiburModal = (show) => {
                         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
                             ${['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].map(day => `
                                 <label style="display:flex; align-items:center; gap:4px; font-size:0.85rem; cursor:pointer; background:var(--bg); padding:4px 8px; border-radius:4px; border:1px solid var(--border);">
-                                    <input type="checkbox" name="days" value="${day}"> ${day}
+                                    <input type="checkbox" name="days" value="${day}" ${(Data.days && Data.days.includes(day)) ? 'checked' : ''}> ${day}
                                 </label>
                             `).join('')}
                         </div>
 
-                        <label class="form-label">Pilih Jam yang DIBLOKIR (Biarkan kosong jika seharian):</label>
+                        <label class="form-label">Pilih Jam yang DIBLOKIR:</label>
                         <div style="display:flex; gap:10px; flex-wrap:wrap;">
                             ${['08:30', '10:00', '11:30', '13:30'].map(time => `
                                 <label style="display:flex; align-items:center; gap:4px; font-size:0.85rem; cursor:pointer; background:var(--bg); padding:4px 8px; border-radius:4px; border:1px solid var(--border);">
-                                    <input type="checkbox" name="times" value="${time}"> ${time}
+                                    <input type="checkbox" name="times" value="${time}" ${(Data.times && Data.times.includes(time)) ? 'checked' : ''}> ${time}
                                 </label>
                             `).join('')}
                         </div>
@@ -1807,19 +2113,22 @@ window.toggleAddLiburModal = (show) => {
 
                      <div class="form-group">
                         <label class="form-label">Keterangan / Alasan</label>
-                        <input type="text" name="reason" class="form-input" required placeholder="Contoh: Mengajar Kelas Lain, Dinas, dll">
+                        <input type="text" name="reason" class="form-input" required placeholder="Contoh: Mengajar..." value="${Data.reason || ''}">
                     </div>
                     
                     <div class="modal-footer">
                         <button type="button" class="btn-secondary" onclick="window.toggleAddLiburModal(false)">Batal</button>
-                        <button type="submit">Simpan Aturan</button>
+                        <button type="submit">${isEdit ? 'Update Aturan' : 'Simpan Aturan'}</button>
                     </div>
                 </form>
             </div>
         `;
 
         document.body.appendChild(modalContainer);
-        setTimeout(() => modalContainer.classList.add('active'), 10);
+        setTimeout(() => {
+            modalContainer.classList.add('active');
+            window.handleRuleTypeChange(Data.type || 'date'); // Initialize visibility
+        }, 10);
     } else {
         if (modal) {
             modal.classList.remove('active');
@@ -1839,6 +2148,7 @@ window.saveNewLibur = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const type = formData.get('type');
+    const editIndex = parseInt(formData.get('editIndex'));
 
     let newLibur = {
         dosenId: formData.get('dosenId'),
@@ -1866,7 +2176,15 @@ window.saveNewLibur = (e) => {
         }
     }
 
-    MOCK_DATA.libur.push(newLibur);
+    if (!isNaN(editIndex) && editIndex >= 0) {
+        // Edit Mode
+        MOCK_DATA.libur[editIndex] = newLibur;
+    } else {
+        // Add Mode
+        MOCK_DATA.libur.push(newLibur);
+    }
+
+    saveLiburToStorage();
 
     if (currentView === 'libur') {
         mainContent.innerHTML = views.libur();
@@ -1884,6 +2202,17 @@ window.deleteLibur = (index) => {
     }
     // }
     saveLiburToStorage();
+};
+
+window.resetLiburData = () => {
+    if (confirm('⚠️ Yakin ingin MERESET data libur ke Default?\nData custom yang Anda buat akan hilang.')) {
+        MOCK_DATA.libur = [...INITIAL_LIBUR]; // Copy fresh seed data
+        saveLiburToStorage();
+        if (currentView === 'libur') {
+            mainContent.innerHTML = views.libur();
+        }
+        alert('✅ Data libur berhasil di-reset ke default.');
+    }
 };
 
 
@@ -1904,60 +2233,138 @@ function logToLogic(message) {
 }
 
 window.generateSchedule = async () => {
-    // 1. Persiapan
+    // 1. Preparation & Configuration
     const logEl = document.getElementById('logicLog');
-    if (logEl) logEl.innerHTML = ''; // Clear log
+    if (logEl) logEl.innerHTML = '';
+
+    // Read UI Controls
+    const scopeEl = document.getElementById('scheduleScope');
+    const incrementalEl = document.getElementById('incrementalMode');
+    const targetProdi = scopeEl ? scopeEl.value : 'all';
+    const isIncremental = incrementalEl ? incrementalEl.checked : false;
 
     logToLogic("🚀 MEMULAI PROSES PENJADWALAN OTOMATIS...");
+    logToLogic(`⚙️ Mode: ${isIncremental ? 'INCREMENTAL (Lanjutkan)' : 'RESET FULL'}`);
+    logToLogic(`🎯 Target: ${targetProdi === 'all' ? 'Semua Mahasiswa' : targetProdi}`);
     logToLogic("----------------------------------------");
 
-    // Ambil data dan URUTKAN agar deterministik (A-Z / NIM)
-    const mahasiswaList = [...MOCK_DATA.mahasiswa].sort((a, b) => a.nim.localeCompare(b.nim));
+    // Filter Mahasiswa based on Config
+    let mahasiswaList = [...MOCK_DATA.mahasiswa];
+
+    // Apply Prodi Filter
+    if (targetProdi !== 'all') {
+        mahasiswaList = mahasiswaList.filter(m => m.prodi === targetProdi);
+    }
+
+    // Sort deterministik
+    mahasiswaList.sort((a, b) => a.nim.localeCompare(b.nim));
 
     if (mahasiswaList.length === 0) {
-        logToLogic("❌ ERROR: Data mahasiswa kosong. Silakan input data mahasiswa terlebih dahulu.");
+        logToLogic("⚠️ Tidak ada mahasiswa yang sesuai dengan filter Prodi ini.");
         return;
     }
 
-    logToLogic(`📦 Ditemukan ${mahasiswaList.length} mahasiswa (Diurutkan NIM).`);
+    logToLogic(`📦 Memproses ${mahasiswaList.length} mahasiswa.`);
 
-    // Reset Slot
-    logToLogic("🧹 Membersihkan slot jadwal lama...");
-    MOCK_DATA.slots = [];
+    // Handle Incremental vs Reset
+    const scheduledMahasiswaIds = new Set();
+
+    if (isIncremental) {
+        logToLogic("🔄 Membaca jadwal yang ada...");
+        // Load existing scheduled IDs (global, not just filtered ones, to avoid double booking)
+        MOCK_DATA.slots.forEach(s => {
+            // Find student by name (assuming name is unique, better use NIM if stored)
+            // In real app better store NIM in slot. For now map name back to NIM if needed.
+            // Simplified: We assume slot.student is the name.
+            if (s.student) {
+                // Find matching student data to get NIM
+                const m = MOCK_DATA.mahasiswa.find(x => x.nama === s.student);
+                if (m) scheduledMahasiswaIds.add(m.nim);
+            }
+        });
+        logToLogic(`   -> ${scheduledMahasiswaIds.size} mahasiswa sudah terjadwal sebelumnya.`);
+    } else {
+        logToLogic("🧹 Membersihkan semua slot jadwal (RESET)...");
+        MOCK_DATA.slots = [];
+    }
 
     // Resource Constraint
     const allDosen = getAllDosen();
     logToLogic(`👥 Mengindeks ${allDosen.length} data dosen...`);
 
-    // Tracking beban penguji untuk distribusi merata
+    // Tracking beban penguji (Load Balancing) - Load existing counts if incremental
     const examinerCounts = {};
-    logToLogic(`⚖️ Soft Constraint Aktif: Maksimal ${MAX_EXAMINER_ASSIGNMENTS} tugas per dosen (kecuali pembimbing wajib).`);
+    if (isIncremental) {
+        MOCK_DATA.slots.forEach(slot => {
+            if (slot.examiners) {
+                slot.examiners.forEach(ex => {
+                    examinerCounts[ex] = (examinerCounts[ex] || 0) + 1;
+                });
+            }
+        });
+    }
 
-    // Helper: Cari Penguji Pendamping (STRATEGI: SEQUENTIAL / FIRST-FIT + LOAD BALANCING)
+    logToLogic(`⚖️ Soft Constraint Aktif: Maksimal ${MAX_EXAMINER_ASSIGNMENTS} tugas per dosen.`);
+
+    // ... (Keep findExaminers helper same as before) ...
     // Helper: Cari Penguji Pendamping (STRATEGI: SEQUENTIAL / FIRST-FIT + LOAD BALANCING + PRODI MATCHING)
     const findExaminers = (pembimbing, date, time, studentProdi) => {
         let candidates = [];
 
-        // Strict Prodi Matching Logic
-        // FES & FST: Wajib sesama prodi
-        // FIK: Campur, KECUALI Teknologi Informasi (Wajib sesama TI)
-        const isStrictProdi = (
-            MOCK_DATA.facultyData.FES.some(d => d.prodi === studentProdi) ||
-            MOCK_DATA.facultyData.FST.some(d => d.prodi === studentProdi) ||
-            studentProdi === 'S1 Teknologi Informasi' || studentProdi === 'Teknologi Informasi'
-        );
+        // Logic Prodi Matching: FIK Cross-Prodi (Kecuali TI, S2, S3)
 
-        for (const d of allDosen) {
+        // 1. Definisi Grup Strict di FIK (Tidak boleh lintas)
+        const STRICT_FIK_GROUP = [
+            'teknologi informasi', 's1 teknologi informasi',
+            's2 informatika', 's2 pjj informatika',
+            's3 informatika'
+        ];
+
+        const sProdiNorm = studentProdi?.trim().toLowerCase();
+
+        // Cek Fakultas Mahasiswa (Assumption: Based on Prodi Name match in Faculty Data)
+        let studentFakultas = 'UNKNOWN';
+        if (MOCK_DATA.facultyData.FIK.some(d => d.prodi.toLowerCase() === sProdiNorm)) studentFakultas = 'FIK';
+        else if (MOCK_DATA.facultyData.FES.some(d => d.prodi.toLowerCase() === sProdiNorm)) studentFakultas = 'FES';
+        else if (MOCK_DATA.facultyData.FST.some(d => d.prodi.toLowerCase() === sProdiNorm)) studentFakultas = 'FST';
+
+        // Logic Penentu: Apakah ini kasus Cross-Prodi FIK?
+        // Syarat: Mhs FIK DAN BUKAN anak TI/S2/S3
+        const isFikCrossAllowedCase = (studentFakultas === 'FIK') && (!STRICT_FIK_GROUP.includes(sProdiNorm));
+
+        // 3. STRATEGI LOAD BALANCING (FAIRNESS)
+        // Sort dosen by current workload (least busy first)
+        // Agar tidak terjadi ketimpangan (Dosen A=5, Dosen B=1), kita prioritaskan yg beban kerjanya masih sedikit.
+
+        // Clone array to avoid mutating original order if it matters elsewhere
+        const candidatePool = [...allDosen].sort((a, b) => {
+            const loadA = examinerCounts[a.nama] || 0;
+            const loadB = examinerCounts[b.nama] || 0;
+            return loadA - loadB; // Ascending: 0, 1, 2...
+        });
+
+        for (const d of candidatePool) {
             if (candidates.length >= 2) break;
             if (d.nama !== pembimbing) {
 
-                // Cek constraint Prodi
-                if (isStrictProdi) {
-                    // Normalisasi nama prodi untuk perbandingan aman
-                    const dProdi = d.prodi?.trim().toLowerCase();
-                    const sProdi = studentProdi?.trim().toLowerCase();
-                    // Jika prodi tidak sama, skip dosen ini
-                    if (dProdi !== sProdi) continue;
+                // Cek Constraint Prodi
+                const dProdiNorm = d.prodi?.trim().toLowerCase();
+
+                if (isFikCrossAllowedCase) {
+                    // KASUS FIK LINTAS PRODI:
+                    // Syarat:
+                    // 1. Dosen harus dari FIK
+                    // 2. Dosen TIDAK boleh dari prodi Strict (TI/S2/S3)
+
+                    if (d.fakultas !== 'FIK') continue;
+                    if (STRICT_FIK_GROUP.includes(dProdiNorm)) continue;
+
+                    // Jika lolos, berarti dosen ini eligible (Informatika, SI, TekKom, D3, dll)
+
+                } else {
+                    // KASUS STRICT (TI, S2, S3, FES, FST):
+                    // Syarat: Prodi harus sama persis
+                    if (dProdiNorm !== sProdiNorm) continue;
                 }
 
                 // Check availability
@@ -1975,57 +2382,61 @@ window.generateSchedule = async () => {
     };
 
     // --- CORE LOOP (SLOT-CENTRIC APPROACH) ---
-    // Strategi: "Isi slot kosong dulu sampai penuh, jangan loncat"
-
-    // 1. Generate semua kemungkinan slot secara urut (Flattened berdasarkan TANGGAL)
+    // 1. Generate Slots
     const allPossibleSlots = [];
     for (const dateObj of DATES) {
         const date = dateObj.value;
         const day = dateObj.label;
-
         for (const time of TIMES) {
-            // CONSTRAINT KHUSUS: Jumat tidak ada 11:30
             if (day === 'Jumat' && time === '11:30') continue;
-
             for (const room of ROOMS) {
                 allPossibleSlots.push({ date, day, time, room });
             }
         }
     }
 
-    logToLogic(`⚙️ Generate ${allPossibleSlots.length} slot potensial.`);
+    logToLogic(`⚙️ Memindai ${allPossibleSlots.length} slot waktu...`);
 
     let successCount = 0;
-    const scheduledMahasiswaIds = new Set(); // Track NIM yang sudah dijadwal
 
-    // 2. Loop Slot Satu per Satu
+    // 2. Loop Slot
     slotLoop:
     for (const slot of allPossibleSlots) {
         const { date, day, time, room } = slot;
 
-        // Cek apakah mahasiswa semua sudah habis?
-        if (scheduledMahasiswaIds.size >= mahasiswaList.length) {
-            logToLogic("✅ Semua mahasiswa sudah dijadwalkan.");
-            break;
+        // CRITICAL CHECK: Strict Slot Collision Detection
+        // If incremental, skip this slot if it's already taken in MOCK_DATA.slots
+        const isOccupied = MOCK_DATA.slots.some(s => s.date === date && s.time === time && s.room === room);
+        if (isOccupied) {
+            continue; // Smart Skip
         }
 
-        // Cari mahasiswa yang cocok untuk slot ini
+        // Check completion within SCOPE
+        // Only count valid if ALL target students are done
+        // But since we iterate slots, we just stop if we run out of eligible students.
+
         let candidateFound = null;
         let finalExaminers = null;
 
         for (const mhs of mahasiswaList) {
-            // Skip jika sudah dijadwalkan
+            // Skip jika sudah dijadwalkan (Global Check)
             if (scheduledMahasiswaIds.has(mhs.nim)) continue;
 
             // 1. Cek Pembimbing Available di (date, time)
-            if (!mhs.pembimbing) continue;
-            const pbData = allDosen.find(d => d.nama === mhs.pembimbing);
-            if (!pbData || pbData.exclude) continue; // Dosen OFF
-            if (!isDosenAvailable(mhs.pembimbing, date, time)) continue; // Dosen Sibuk
+            // 1. Cek Pembimbing Available di (date, time)
+            if (!mhs.pembimbing) {
+                // logToLogic(`   [!] Mahasiswa ${mhs.nama} tidak memiliki pembimbing.`);
+                continue;
+            }
+            // Logic Update: Pembimbing WAJIB hadir meskipun statusnya OFF (ignoreGlobalExclude = true)
+            // Kita hapus pengecekan pbData.exclude di sini.
+
+            // Cek ketersediaan pembimbing (Force Available jika Exclude)
+            if (!isDosenAvailable(mhs.pembimbing, date, time, null, true)) continue;
 
             // 2. Cek Penguji Pendamping
             const examiners = findExaminers(mhs.pembimbing, date, time, mhs.prodi);
-            if (!examiners) continue; // Tidak dapat penguji
+            if (!examiners) continue;
 
             candidateFound = mhs;
             finalExaminers = [...examiners, mhs.pembimbing];
@@ -2084,17 +2495,21 @@ window.generateSchedule = async () => {
     }, 500);
 };
 
-// Call initializeApp (defined earlier at line 214)
-initializeApp();
-
 window.handleProdiFilterChange = (event) => {
     selectedProdiFilter = event.target.value;
+    appState.selectedProdiFilter = selectedProdiFilter; // Sync
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = views.dosen();
 };
 
+window.handleStatusFilterChange = (event) => {
+    selectedStatusFilter = event.target.value;
+    appState.selectedStatusFilter = selectedStatusFilter; // Sync
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = views.dosen();
+};
 
 // All persistence helpers are now imported from store.js
 
-// Initialize the application when the module loads
+// Initial execution
 initializeApp();

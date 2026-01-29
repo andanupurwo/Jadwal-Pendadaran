@@ -10,14 +10,15 @@ import { getAllDosen } from '../utils/helpers.js';
  * @param {string} date - Date in format 'YYYY-MM-DD'
  * @param {string} time - Time in format 'HH:MM'
  * @param {string|null} excludeSlotStudent - Student NIM to exclude from conflict check
+ * @param {boolean} ignoreGlobalExclude - If true, ignores the manual 'OFF' toggle (e.g. for Supervisors)
  * @returns {boolean} - True if available, false otherwise
  */
-export function isDosenAvailable(namaDosen, date, time, excludeSlotStudent = null) {
+export function isDosenAvailable(namaDosen, date, time, excludeSlotStudent = null, ignoreGlobalExclude = false) {
     const allDosen = getAllDosen();
     const dosenData = allDosen.find(d => d.nama === namaDosen);
 
-    // 1. Check if lecturer is toggled OFF
-    if (dosenData && dosenData.exclude) return false;
+    // 1. Check if lecturer is toggled OFF (Unless forced)
+    if (!ignoreGlobalExclude && dosenData && dosenData.exclude) return false;
 
     // 2. Check availability rules (Advanced Constraints)
     let dayName = '';

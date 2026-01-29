@@ -9,33 +9,41 @@ export function getAllDosen() {
         ...(MOCK_DATA.facultyData.FIK || []),
         ...(MOCK_DATA.facultyData.FES || []),
         ...(MOCK_DATA.facultyData.FST || [])
-    ].sort((a, b) => a.nama.localeCompare(b.nama));
+    ].sort((a, b) => {
+        const nameA = a.nama || "";
+        const nameB = b.nama || "";
+        return nameA.localeCompare(nameB);
+    });
 }
 
 // Sorting function with support for different data types
-export function sortData(data, column) {
+export function sortData(data, column, direction = null) {
+    const dir = direction || appState.sortDirection || 'asc';
+
     const sorted = [...data].sort((a, b) => {
         let valA = a[column];
         let valB = b[column];
 
         // Handle boolean sorting for exclude (OFF/ON)
         if (column === 'exclude') {
-            valA = !!valA; // undefined -> false
-            valB = !!valB;
+            valA = valA ? 1 : 0;
+            valB = valB ? 1 : 0;
+            // If direction is asc: 0 (ON) comes first, 1 (OFF) comes later
+            // If direction is desc: 1 (OFF) comes first, 0 (ON) comes later
+        } else {
+            // Convert to string for comparison if needed
+            if (typeof valA === 'string') valA = valA.toLowerCase();
+            if (typeof valB === 'string') valB = valB.toLowerCase();
+
+            // Handle numbers
+            if (valA !== null && valB !== null && !isNaN(valA) && !isNaN(valB) && typeof valA !== 'boolean') {
+                valA = Number(valA);
+                valB = Number(valB);
+            }
         }
 
-        // Convert to string for comparison if needed
-        if (typeof valA === 'string') valA = valA.toLowerCase();
-        if (typeof valB === 'string') valB = valB.toLowerCase();
-
-        // Handle numbers
-        if (!isNaN(valA) && !isNaN(valB)) {
-            valA = Number(valA);
-            valB = Number(valB);
-        }
-
-        if (valA < valB) return appState.sortDirection === 'asc' ? -1 : 1;
-        if (valA > valB) return appState.sortDirection === 'asc' ? 1 : -1;
+        if (valA < valB) return dir === 'asc' ? -1 : 1;
+        if (valA > valB) return dir === 'asc' ? 1 : -1;
         return 0;
     });
 
