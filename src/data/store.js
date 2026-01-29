@@ -2,10 +2,10 @@
 // Centralized data storage and state management
 
 // Import constants from config
-import { ROOMS, TIMES, DATES, MAX_EXAMINER_ASSIGNMENTS } from '../config/constants.js';
+import { ROOMS, TIMES, DATES } from '../config/constants.js';
 
 // Re-export constants for backward compatibility
-export { ROOMS, TIMES, DATES, MAX_EXAMINER_ASSIGNMENTS };
+export { ROOMS, TIMES, DATES };
 
 export let MOCK_DATA = {
     masterDosen: [],
@@ -84,19 +84,25 @@ export function loadLiburFromStorage() {
 
 export function saveMahasiswaToStorage() {
     localStorage.setItem('mahasiswa_data_v1', JSON.stringify(MOCK_DATA.mahasiswa));
+    localStorage.setItem('slots_data_v1', JSON.stringify(MOCK_DATA.slots));
 }
 
 export function loadMahasiswaFromStorage() {
-    const raw = localStorage.getItem('mahasiswa_data_v1');
-    if (!raw) return;
-    try {
-        const loadedData = JSON.parse(raw);
-        if (Array.isArray(loadedData)) {
-            MOCK_DATA.mahasiswa = loadedData;
-            console.log('Loaded mahasiswa data from LocalStorage.');
-        }
-    } catch (e) {
-        console.error('Failed to load mahasiswa data', e);
+    const rawM = localStorage.getItem('mahasiswa_data_v1');
+    const rawS = localStorage.getItem('slots_data_v1');
+
+    if (rawM) {
+        try {
+            const data = JSON.parse(rawM);
+            if (Array.isArray(data)) MOCK_DATA.mahasiswa = data;
+        } catch (e) { console.error(e); }
+    }
+
+    if (rawS) {
+        try {
+            const data = JSON.parse(rawS);
+            if (Array.isArray(data)) MOCK_DATA.slots = data;
+        } catch (e) { console.error(e); }
     }
 }
 

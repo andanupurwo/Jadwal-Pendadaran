@@ -276,14 +276,12 @@ button,
   gap: 6px;
 }
 
-.btn-primary,
-button:not(.btn-secondary) {
+.btn-primary {
   background: var(--primary);
   color: white;
 }
 
-.btn-primary:hover,
-button:not(.btn-secondary):hover {
+.btn-primary:hover {
   background: var(--primary-hover);
   box-shadow: 0 4px 12px rgba(88, 86, 214, 0.25);
 }
@@ -295,6 +293,35 @@ button:not(.btn-secondary):hover {
 
 .btn-secondary:hover {
   background: rgba(0, 0, 0, 0.1);
+}
+
+.btn-danger {
+  background: rgba(255, 59, 48, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(255, 59, 48, 0.2);
+}
+
+.btn-danger:hover {
+  background: var(--danger);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.2);
+}
+
+.btn-icon {
+  background: none !important;
+  border: none !important;
+  padding: 6px !important;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  transition: all 0.2s;
+  box-shadow: none !important;
+  color: inherit;
+}
+
+.btn-icon:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+  transform: translateY(-1px);
 }
 
 button:active {
@@ -447,4 +474,93 @@ input:checked+.slider:before {
 
 .excluded-row:hover td {
   background: #fffafa !important;
+}
+
+/* Show actions on hover */
+.room-slot:hover .delete-slot-btn {
+  opacity: 1 !important;
+}
+
+/* --- ADDED UI UTILITIES --- */
+
+/* Text Truncation */
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* Primary Badge */
+.badge-primary {
+  background: var(--primary-subtle);
+  color: var(--primary);
+  border: 1px solid rgba(88, 86, 214, 0.2);
+}
+
+/* Room Slot Enhancements */
+.room-slot {
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+.room-slot:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  z-index: 5;
+}
+
+.slot-filled:hover {
+  border-color: var(--primary) !important;
+}
+
+.slot-empty:hover {
+  background: rgba(88, 86, 214, 0.03) !important;
+  border: 1px dashed var(--primary) !important;
+}
+
+.nav-item:hover .nav-icon {
+  transform: scale(1.1);
+  color: var(--primary);
+}
+
+/* Custom Scrollbar for Terminal Log */
+#logicLog::-webkit-scrollbar {
+  width: 8px;
+}
+
+#logicLog::-webkit-scrollbar-track {
+  background: #111;
+}
+
+#logicLog::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+#logicLog::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* Highlight Animation */
+.slot-highlight {
+  animation: highlight-pulse 0.8s ease-in-out 3;
+  z-index: 100 !important;
+  border: 2px solid var(--primary) !important;
+}
+
+@keyframes highlight-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(88, 86, 214, 0.7);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px 10px rgba(88, 86, 214, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(88, 86, 214, 0);
+  }
 }

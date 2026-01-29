@@ -18,7 +18,7 @@ export const DATES = [
     { value: '2026-02-27', label: 'Jumat', display: '27 Feb' }
 ];
 
-export const MAX_EXAMINER_ASSIGNMENTS = 5;
+
 
 // Data file paths
 export const DATA_PATHS = {

@@ -3,13 +3,27 @@
 
 import { appState, MOCK_DATA } from '../data/store.js';
 
-// Get all dosen from all faculties
+// Get all unique dosen from all faculties
 export function getAllDosen() {
-    return [
+    const combined = [
         ...(MOCK_DATA.facultyData.FIK || []),
         ...(MOCK_DATA.facultyData.FES || []),
         ...(MOCK_DATA.facultyData.FST || [])
-    ].sort((a, b) => {
+    ];
+
+    // Deduplicate by NIK (preferred) or Nama
+    const unique = [];
+    const seen = new Set();
+
+    for (const d of combined) {
+        const key = d.nik || d.nama;
+        if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(d);
+        }
+    }
+
+    return unique.sort((a, b) => {
         const nameA = a.nama || "";
         const nameB = b.nama || "";
         return nameA.localeCompare(nameB);

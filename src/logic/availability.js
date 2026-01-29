@@ -2,7 +2,7 @@
 // Checks if a lecturer is available at a specific date and time
 
 import { MOCK_DATA, DATES } from '../data/store.js';
-import { getAllDosen } from '../utils/helpers.js';
+import { getAllDosen, normalizeName } from '../utils/helpers.js';
 
 /**
  * Check if a lecturer is available at a specific date and time
@@ -15,50 +15,40 @@ import { getAllDosen } from '../utils/helpers.js';
  */
 export function isDosenAvailable(namaDosen, date, time, excludeSlotStudent = null, ignoreGlobalExclude = false) {
     const allDosen = getAllDosen();
-    const dosenData = allDosen.find(d => d.nama === namaDosen);
+    const searchNameNorm = normalizeName(namaDosen);
 
-    // 1. Check if lecturer is toggled OFF (Unless forced)
+    // Cari data dosen
+    const dosenData = allDosen.find(d => normalizeName(d.nama) === searchNameNorm);
+
+    if (!dosenData) {
+        console.warn(`[Availability] Data dosen tidak ditemukan untuk nama: ${namaDosen}`);
+        // Jika tidak ada data dosen di master, kita anggap tersedia saja daripada error, 
+        // tapi tetap cek libur secara manual lewat nama
+    }
+
+    // 1. Check manual 'OFF' toggle
     if (!ignoreGlobalExclude && dosenData && dosenData.exclude) return false;
 
-    // 2. Check availability rules (Advanced Constraints)
-    let dayName = '';
-    const dateRef = DATES.find(d => d.value === date);
-    if (dateRef) dayName = dateRef.label;
-
+    // 2. Check Libur/Unavailability Rules
     const isLibur = MOCK_DATA.libur.some(l => {
-        if (l.dosenId !== dosenData?.nik) return false;
+        // Cek ID (NIK) jika ada data dosen, atau cek nama langsung
+        const matchId = (dosenData && l.dosenId && l.dosenId === dosenData.nik);
+        const matchNama = normalizeName(l.nama || "") === searchNameNorm;
 
-        // Type 1: Specific Date (Legacy default)
-        if (!l.type || l.type === 'date') {
-            return l.date === date;
-        }
-
-        // Type 2: Date Range
-        if (l.type === 'range') {
-            return date >= l.start && date <= l.end;
-        }
-
-        // Type 3: Recurring Days / Times
-        if (l.type === 'recurring') {
-            if (l.days && l.days.includes(dayName)) {
-                // If no specific times, entire day is blocked
-                if (!l.times || l.times.length === 0) return true;
-
-                // If specific times, check if this time is blocked
-                if (l.times.includes(time)) return true;
-            }
-        }
-
-        return false;
+        if (!matchId && !matchNama) return false;
+        return l.dates && l.dates.includes(date);
     });
 
     if (isLibur) return false;
 
-    // 3. Check for scheduling conflicts
-    const bentrok = MOCK_DATA.slots.some(slot => {
+    // 3. Check for busy conflicts (prajadwal di slot lain)
+    const busy = MOCK_DATA.slots.some(slot => {
         if (excludeSlotStudent && slot.student === excludeSlotStudent) return false;
-        return slot.date === date && slot.time === time && slot.examiners.includes(namaDosen);
+        if (slot.date !== date || slot.time !== time) return false;
+
+        // Cek apakah dia jadi P1, P2, atau Pembimbing di slot tersebut
+        return slot.examiners && slot.examiners.some(ex => normalizeName(ex) === searchNameNorm);
     });
 
-    return !bentrok;
+    return !busy;
 }

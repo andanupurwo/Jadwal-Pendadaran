@@ -56,12 +56,14 @@
     margin-bottom: 1rem;
 }
 
-.form-label {
+.form-label,
+.form-group label {
     display: block;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-main);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.01em;
 }
 
 .form-input {
