@@ -61,13 +61,11 @@ export function toggleDosenScheduling(faculty, nik) {
 }
 
 export function wipeLiburData() {
-    requestAnimationFrame(() => {
-        if (confirm('Hapus SEMUA aturan ketersediaan dosen?')) {
-            MOCK_DATA.libur = [];
-            saveLiburToStorage();
-            refreshView('libur');
-        }
-    });
+    if (confirm('Hapus SEMUA aturan ketersediaan dosen?')) {
+        MOCK_DATA.libur = [];
+        saveLiburToStorage();
+        refreshView('libur');
+    }
 }
 
 export function resetLiburData() {
@@ -85,15 +83,12 @@ export function deleteLibur(idx) {
 }
 
 export function wipeMahasiswaData() {
-    // Gunakan requestAnimationFrame agar browser selesai memproses klik sebelum popup muncul
-    requestAnimationFrame(() => {
-        if (confirm('Hapus SEMUA data mahasiswa?')) {
-            MOCK_DATA.mahasiswa = [];
-            MOCK_DATA.slots = [];
-            saveMahasiswaToStorage();
-            refreshView('mahasiswa');
-        }
-    });
+    if (confirm('Hapus SEMUA data mahasiswa?')) {
+        MOCK_DATA.mahasiswa = [];
+        MOCK_DATA.slots = [];
+        saveMahasiswaToStorage();
+        refreshView('mahasiswa');
+    }
 }
 
 export function selectScheduleDate(val) {
