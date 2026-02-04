@@ -26,6 +26,8 @@ window.exportSDMData = modals.exportSDMData;
 window.toggleAddMasterDosenModal = modals.toggleAddMasterDosenModal;
 window.saveNewMasterDosen = modals.saveNewMasterDosen;
 window.deleteMasterDosen = modals.deleteMasterDosen;
+window.clearAllSchedule = actions.clearAllSchedule;
+window.exportScheduleToCSV = actions.exportScheduleToCSV;
 
 async function initializeApp() {
     // Check authentication first

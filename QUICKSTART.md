@@ -42,7 +42,7 @@ Edit `backend/.env`:
 ```env
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=your_mysql_password
+DB_PASSWORD=your_pgsql_password
 DB_NAME=jadwal_pendadaran
 PORT=3000
 CORS_ORIGIN=http://localhost:5173
@@ -56,13 +56,13 @@ VITE_API_URL=http://localhost:3000/api
 
 ### 3️⃣ Setup Database
 
-**Start MySQL:**
+**Start PostgreSQL:**
 ```bash
 # macOS (dengan Homebrew)
-brew services start mysql
+brew services start PostgreSQL
 
 # Linux
-sudo systemctl start mysql
+sudo systemctl start PostgreSQL
 ```
 
 **Initialize Database:**
@@ -94,7 +94,7 @@ npm run dev
 
 Output expected:
 ```
-✅ MySQL Database connected successfully
+✅ PostgreSQL Database connected successfully
 🚀 Jadwal Pendadaran Backend API
 📡 Server running on: http://localhost:3000
 ```
@@ -122,7 +122,7 @@ http://localhost:5173
 
 - [ ] Backend running di port 3000
 - [ ] Frontend running di port 5173
-- [ ] MySQL database created
+- [ ] PostgreSQL database created
 - [ ] No console errors
 - [ ] Data dosen loaded from CSV
 - [ ] Can navigate between pages
@@ -167,15 +167,15 @@ npm run dev
 
 **Solution:**
 ```bash
-# Check MySQL is running
-mysql -u root -p
+# Check PostgreSQL is running
+PostgreSQL -u root -p
 
-# If error, start MySQL:
+# If error, start PostgreSQL:
 # macOS:
-brew services start mysql
+brew services start PostgreSQL
 
 # Linux:
-sudo systemctl start mysql
+sudo systemctl start PostgreSQL
 ```
 
 ### Issue: "Port 3000 already in use"
@@ -250,11 +250,11 @@ After successful setup:
 2. **Database**
    - Backup database sebelum testing:
      ```bash
-     mysqldump -u root -p jadwal_pendadaran > backup.sql
+     PostgreSQLdump -u root -p jadwal_pendadaran > backup.sql
      ```
    - Restore jika diperlukan:
      ```bash
-     mysql -u root -p jadwal_pendadaran < backup.sql
+     PostgreSQL -u root -p jadwal_pendadaran < backup.sql
      ```
 
 3. **Performance**

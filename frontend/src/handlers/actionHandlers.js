@@ -56,6 +56,22 @@ export async function deleteSlot(id) {
     }
 }
 
+export async function clearAllSchedule() {
+    if (await showConfirm('Yakin ingin MENGHAPUS SEMUA jadwal ujian? Data jadwal akan hilang permanen.', 'Konfirmasi Hapus Semua')) {
+        try {
+            const { slotsAPI } = await import('../services/api.js');
+            const response = await slotsAPI.deleteAll();
+            if (response.success) {
+                APP_DATA.slots = [];
+                refreshView('home');
+                showToast('Semua jadwal berhasil dihapus.', 'success');
+            }
+        } catch (error) {
+            showToast('Gagal membersihkan jadwal: ' + error.message, 'error');
+        }
+    }
+}
+
 export function switchDosenTab(tabId) {
     appState.currentDosenTab = tabId;
     refreshView('dosen');
@@ -215,6 +231,80 @@ export function viewAndHighlightSchedule(studentName) {
     }, 300);
 }
 
+
+export async function exportScheduleToCSV() {
+    if (!APP_DATA.slots || APP_DATA.slots.length === 0) {
+        showToast('Belum ada jadwal untuk di-export.', 'warning');
+        return;
+    }
+
+    try {
+        // Dynamically import xlsx library
+        const XLSX = await import('xlsx');
+
+        // 1. Prepare data in array format
+        const data = [
+            // Header row
+            ['No', 'NIM', 'Mahasiswa', 'Tanggal', 'Jam', 'Ruangan', 'Penguji 1', 'Penguji 2', 'Pembimbing']
+        ];
+
+        // 2. Add data rows
+        APP_DATA.slots.forEach((slot, index) => {
+            const p1 = slot.examiners && slot.examiners[0] ? slot.examiners[0] : '-';
+            const p2 = slot.examiners && slot.examiners[1] ? slot.examiners[1] : '-';
+            const p3 = slot.examiners && slot.examiners[2] ? slot.examiners[2] : '-';
+
+            // Find mahasiswa data to get NIM
+            const mahasiswa = APP_DATA.mahasiswa.find(m => m.nama === slot.student);
+            const nim = mahasiswa ? mahasiswa.nim : '-';
+
+            data.push([
+                index + 1,
+                nim,
+                slot.student,
+                slot.date,
+                slot.time,
+                slot.room,
+                p1,
+                p2,
+                p3
+            ]);
+        });
+
+        // 3. Create worksheet from data
+        const ws = XLSX.utils.aoa_to_sheet(data);
+
+        // 4. Set column widths for better readability
+        ws['!cols'] = [
+            { wch: 5 },   // No
+            { wch: 18 },  // NIM
+            { wch: 30 },  // Mahasiswa
+            { wch: 12 },  // Tanggal
+            { wch: 8 },   // Jam
+            { wch: 10 },  // Ruangan
+            { wch: 30 },  // Penguji 1
+            { wch: 30 },  // Penguji 2
+            { wch: 30 }   // Pembimbing
+        ];
+
+        // 5. Create workbook and add worksheet
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Jadwal Pendadaran');
+
+        // 6. Generate filename with timestamp
+        const now = new Date();
+        const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+        const filename = `Jadwal_Pendadaran_${timestamp}.xlsx`;
+
+        // 7. Write and download
+        XLSX.writeFile(wb, filename);
+
+        showToast('Jadwal berhasil di-export ke Excel (.xlsx)', 'success');
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+        showToast('Gagal export Excel: ' + error.message, 'error');
+    }
+}
 
 export function handleRuleTypeChange(val) {
     document.querySelectorAll('.rule-input').forEach(el => el.style.display = 'none');

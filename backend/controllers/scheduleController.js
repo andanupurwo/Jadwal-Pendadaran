@@ -1,20 +1,6 @@
 import pool from '../config/database.js';
 
-// Constants
-const ROOMS = ['6.3.A', '6.3.B', '6.3.C', '6.3.D', '6.3.E', '6.3.F', '6.3.G', '6.3.H'];
-const TIMES = ['08:30', '10:00', '11:30', '13:30'];
-const DATES = [
-    { value: '2026-02-16', label: 'Senin', display: '16 Feb' },
-    { value: '2026-02-17', label: 'Selasa', display: '17 Feb' },
-    { value: '2026-02-18', label: 'Rabu', display: '18 Feb' },
-    { value: '2026-02-19', label: 'Kamis', display: '19 Feb' },
-    { value: '2026-02-20', label: 'Jumat', display: '20 Feb' },
-    { value: '2026-02-23', label: 'Senin', display: '23 Feb' },
-    { value: '2026-02-24', label: 'Selasa', display: '24 Feb' },
-    { value: '2026-02-25', label: 'Rabu', display: '25 Feb' },
-    { value: '2026-02-26', label: 'Kamis', display: '26 Feb' },
-    { value: '2026-02-27', label: 'Jumat', display: '27 Feb' }
-];
+
 
 // Helper functions
 function normalizeName(nama) {
@@ -143,6 +129,24 @@ export async function generateSchedule(req, res) {
         log(`🎯 Target: ${targetProdi}`);
 
         await client.query('BEGIN');
+
+        // 1. Fetch Dynamic Settings
+        const settingsRes = await client.query('SELECT * FROM app_settings');
+        const settings = settingsRes.rows.reduce((acc, row) => {
+            try { acc[row.setting_key] = JSON.parse(row.setting_value); } catch { acc[row.setting_key] = row.setting_value; }
+            return acc;
+        }, {});
+
+        // Fallback defaults if DB is empty
+        const ROOMS = settings.schedule_rooms || ['6.3.A'];
+        const TIMES = settings.schedule_times || ['08:30'];
+        const DATES = settings.schedule_dates || [];
+
+        if (DATES.length === 0) {
+            log("⚠️ EROR: Tidak ada konfigurasi tanggal di database.");
+            await client.query('ROLLBACK');
+            return res.status(400).json({ success: false, error: 'Konfigurasi tanggal belum diatur.' });
+        }
 
         // Load data
         let { rows: mahasiswaList } = await client.query('SELECT * FROM mahasiswa ORDER BY nim');

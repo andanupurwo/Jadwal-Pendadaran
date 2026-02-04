@@ -1,8 +1,35 @@
 import { APP_DATA, appState, DATES, TIMES, ROOMS } from '../../data/store.js';
 
 export const HomeView = () => {
-    const currentDate = appState.selectedDate || '2026-02-16';
+    // Ensure we have a valid date selected, fallback to first available if needed
+    if ((!appState.selectedDate || !DATES.find(d => d.value === appState.selectedDate)) && DATES.length > 0) {
+        appState.selectedDate = DATES[0].value;
+    }
+
+    const currentDate = appState.selectedDate;
     const dateObj = DATES.find(d => d.value === currentDate);
+
+    // Safety check if no dates configured or invalid date
+    if (!dateObj) {
+        return `
+            <div class="container">
+                <header class="page-header">
+                    <h1>Dashboard</h1>
+                </header>
+                <div class="card" style="text-align: center; padding: 3rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                    <h3>Konfigurasi Tanggal Belum Tersedia</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Belum ada tanggal pelaksanaan yang diatur. Silakan atur di menu Pengaturan.
+                    </p>
+                    <button onclick="window.navigate('settings')" class="btn-primary">
+                        Buka Pengaturan
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
     const selectedDay = dateObj.label;
 
     return `
@@ -13,17 +40,16 @@ export const HomeView = () => {
                     <p class="subtitle">Monitoring slot dan ketersediaan ruangan.</p>
                 </div>
                 <div class="header-actions">
-                    <button onclick="window.exportScheduleToCSV()" class="btn-primary" style="background:#28a745; margin-right:8px; display:flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(40,167,69,0.3);">
-                        <span>💾</span> Export Excel
-                    </button>
                     ${APP_DATA.clipboard ? `
-                        <div class="card" style="margin: 0; padding: 0.6rem 1.25rem; background: var(--primary-subtle); border: 1px dashed var(--primary); display: flex; align-items: center; gap: 12px; border-radius: 12px;">
-                            <span style="font-size: 0.9rem; font-weight: 600; color: var(--primary);">📋 Clipboard: ${APP_DATA.clipboard.student}</span>
-                            <button type="button" onclick="window.moveSlotToClipboard(null)" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">Batal</button>
+                        <div class="card" style="margin: 0; padding: 0.4rem 1rem; background: var(--primary-subtle); border: 1px dashed var(--primary); display: inline-flex; align-items: center; gap: 8px; border-radius: 8px; margin-right: 8px;">
+                            <span style="font-size: 0.8rem; font-weight: 600; color: var(--primary);">📋 ${APP_DATA.clipboard.student}</span>
+                            <button type="button" onclick="window.moveSlotToClipboard(null)" class="btn-icon" style="font-size: 0.8rem;">✕</button>
                         </div>
                     ` : ''}
-                </div>
-            </header>
+                    <button onclick="window.clearAllSchedule()" class="btn-secondary" style="color:var(--danger);">🗑️ Bersihkan Jadwal</button>
+                    <button onclick="window.exportScheduleToCSV()" class="btn-secondary" style="color:var(--success);">💾 Export Excel</button>
+                </div >
+            </header >
             
             <div class="tabs-container" style="margin-bottom: 2rem;">
                 <div class="tabs" style="display: flex; gap: 4px; padding: 4px; background: rgba(118, 118, 128, 0.08); border-radius: 14px;">
@@ -115,6 +141,6 @@ export const HomeView = () => {
                     `).join('')}
                 </div>
             </div>
-        </div>
+        </div >
     `;
 };

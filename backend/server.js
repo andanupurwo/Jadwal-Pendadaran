@@ -8,6 +8,7 @@ import dosenRoutes from './routes/dosen.js';
 import liburRoutes from './routes/libur.js';
 import slotsRoutes from './routes/slots.js';
 import scheduleRoutes from './routes/schedule.js';
+import settingsRoutes from './routes/settings.js';
 
 // Import database
 import pool from './config/database.js';
@@ -40,6 +41,7 @@ app.use('/api/dosen', dosenRoutes);
 app.use('/api/libur', liburRoutes);
 app.use('/api/slots', slotsRoutes);
 app.use('/api/schedule', scheduleRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // 404 handler
 app.use((req, res) => {

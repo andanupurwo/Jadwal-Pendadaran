@@ -12,11 +12,11 @@ export const LogicView = () => `
             
             <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
                 <button onclick="window.generateSchedule()" style="padding: 12px 24px; background: var(--text-main); color: var(--bg); border: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: opacity 0.2s;">
-                    ▶ Jalankan Algoritma
+                    ▶ Jadwalkan Otomatis
                 </button>
                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <label style="font-size: 0.8rem; color: var(--text-secondary); cursor: pointer;">
-                        <input type="checkbox" id="incrementalMode" style="vertical-align: middle;"> Incremental Mode
+                    <label style="font-size: 0.8rem; color: var(--text-secondary); cursor: pointer;" title="Centang untuk menjadwalkan mahasiswa yang belum dapat jadwal saja, tanpa menghapus jadwal yang sudah ada.">
+                        <input type="checkbox" id="incrementalMode" style="vertical-align: middle;"> Lanjutkan jadwal sisa (Tanpa Hapus)
                     </label>
                 </div>
             </div>
@@ -73,7 +73,7 @@ export const LogicView = () => `
                  <section style="margin-bottom: 3.5rem;">
                     <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
                         <span style="background: #f3f4f6; color: #1f2937; width: 24px; height: 24px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">2</span>
-                        Batasan & Aturan (Constraints)
+                        Aturan & Batasan Wajib
                     </h2>
                     <div style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">
                         <p style="margin-bottom: 1.5rem;">Agar jadwal valid, sistem mematuhi aturan keras (hard constraints) berikut:</p>
@@ -107,7 +107,7 @@ export const LogicView = () => `
                  <section>
                     <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
                          <span style="background: #f3f4f6; color: #1f2937; width: 24px; height: 24px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">3</span>
-                        Logika Keadilan (Fairness)
+                        Pemerataan Pembagian Jadwal
                     </h2>
                     <div style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">
                          <p style="margin-bottom: 1rem;">Sistem berusaha membagi beban kerja dosen seadil mungkin.</p>
@@ -128,8 +128,8 @@ export const LogicView = () => `
             <div style="width: 320px; position: sticky; top: 2rem; align-self: flex-start;">
                  <div style="border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; background: #fafafa;">
                     <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Process Log</span>
-                         <button onclick="document.getElementById('logicLog').innerHTML = ''" style="border: none; background: none; font-size: 0.7rem; color: var(--text-muted); cursor: pointer;">Clear</button>
+                        <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Riwayat Proses</span>
+                         <button onclick="document.getElementById('logicLog').innerHTML = ''" style="border: none; background: none; font-size: 0.7rem; color: var(--text-muted); cursor: pointer;">Bersihkan</button>
                     </div>
                     <div id="logicLog" style="height: 400px; padding: 1rem; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #333; background: #fff;">
                         <span style="color: #999;">Waiting for execution...</span>

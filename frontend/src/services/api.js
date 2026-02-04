@@ -120,5 +120,14 @@ export const scheduleAPI = {
     })
 };
 
+// Settings API
+export const settingsAPI = {
+    get: () => apiRequest('/settings'),
+    update: (settings) => apiRequest('/settings', {
+        method: 'POST',
+        body: JSON.stringify(settings)
+    })
+};
+
 // Health Check
 export const healthCheck = () => fetch(`${API_BASE_URL.replace('/api', '')}/health`).then(r => r.json());

@@ -2,11 +2,17 @@
 // Centralized data storage and state management
 // Now using API backend instead of LocalStorage
 
-import { ROOMS, TIMES, DATES } from '../config/constants.js';
-import { mahasiswaAPI, dosenAPI, liburAPI, slotsAPI } from '../services/api.js';
+import {
+    ROOMS as DEFAULT_ROOMS,
+    TIMES as DEFAULT_TIMES,
+    DATES as DEFAULT_DATES
+} from '../config/constants.js';
+import { mahasiswaAPI, dosenAPI, liburAPI, slotsAPI, settingsAPI } from '../services/api.js';
 
-// Re-export constants for backward compatibility
-export { ROOMS, TIMES, DATES };
+// Export mutable variables for settings
+export let ROOMS = DEFAULT_ROOMS;
+export let TIMES = DEFAULT_TIMES;
+export let DATES = DEFAULT_DATES;
 
 export let APP_DATA = {
     masterDosen: [],
@@ -134,6 +140,38 @@ export async function loadSlotsFromAPI() {
     }
 }
 
+export async function loadSettingsFromAPI() {
+    try {
+        const response = await settingsAPI.get();
+        if (response.success) {
+            const settings = response.data;
+
+            if (settings.schedule_rooms && Array.isArray(settings.schedule_rooms)) {
+                ROOMS = settings.schedule_rooms;
+            }
+
+            if (settings.schedule_times && Array.isArray(settings.schedule_times)) {
+                TIMES = settings.schedule_times;
+            }
+
+            if (settings.schedule_dates && Array.isArray(settings.schedule_dates) && settings.schedule_dates.length > 0) {
+                DATES = settings.schedule_dates;
+
+                // Validate appState.selectedDate against new DATES
+                const dateExists = DATES.find(d => d.value === appState.selectedDate);
+                if (!dateExists) {
+                    console.log(`⚠️ Selected date ${appState.selectedDate} invalid for new settings. Resetting to ${DATES[0].value}`);
+                    appState.selectedDate = DATES[0].value;
+                }
+            }
+
+            console.log('✅ Loaded settings from API');
+        }
+    } catch (error) {
+        console.error('Failed to load settings from API:', error);
+    }
+}
+
 // ===== BACKWARD COMPATIBILITY FUNCTIONS =====
 // These are kept for compatibility with existing code
 
@@ -187,7 +225,8 @@ export async function initializeData() {
         loadDosenFromAPI(),
         loadMasterDosenFromAPI(),
         loadLiburFromAPI(),
-        loadSlotsFromAPI()
+        loadSlotsFromAPI(),
+        loadSettingsFromAPI()
     ]);
 
     console.log('✅ All data loaded from API');
