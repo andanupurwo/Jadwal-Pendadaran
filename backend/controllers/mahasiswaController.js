@@ -78,20 +78,33 @@ export async function updateMahasiswa(req, res) {
 }
 
 // Delete mahasiswa
+// Delete mahasiswa
 export async function deleteMahasiswa(req, res) {
+    const client = await pool.connect();
     try {
         const { nim } = req.params;
 
-        const { rowCount } = await pool.query('DELETE FROM mahasiswa WHERE nim = $1', [nim]);
+        await client.query('BEGIN');
+
+        // Delete associated slots first (because ON DELETE SET NULL would break the link)
+        await client.query('DELETE FROM slots WHERE mahasiswa_nim = $1', [nim]);
+
+        // Delete the student
+        const { rowCount } = await client.query('DELETE FROM mahasiswa WHERE nim = $1', [nim]);
 
         if (rowCount === 0) {
+            await client.query('ROLLBACK');
             return res.status(404).json({ success: false, error: 'Mahasiswa not found' });
         }
 
-        res.json({ success: true, message: 'Mahasiswa deleted successfully' });
+        await client.query('COMMIT');
+        res.json({ success: true, message: 'Mahasiswa and associated schedule deleted successfully' });
     } catch (error) {
+        await client.query('ROLLBACK');
         console.error('Error deleting mahasiswa:', error);
         res.status(500).json({ success: false, error: error.message });
+    } finally {
+        client.release();
     }
 }
 
