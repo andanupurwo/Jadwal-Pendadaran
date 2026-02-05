@@ -9,35 +9,119 @@ jobs:
     name: Deploy to Debian Server
     runs-on: ubuntu-latest
     
-    steps:
-    - name: Executing remote ssh commands using key
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        #port: 22
-        script: |
-          # 1. Masuk ke folder project
-          cd /var/www/jadwal-pendadaran
+#     steps:
+#     - name: Executing remote ssh commands using key
+#       uses: appleboy/ssh-action@v1.0.3
+#       with:
+#         host: ${{ secrets.SERVER_HOST }}
+#         username: ${{ secrets.SERVER_USER }}
+#         key: ${{ secrets.SSH_PRIVATE_KEY }}
+#         #port: 22
+#         script: |
+#           # 1. Masuk ke folder project
+#           cd /var/www/jadwal-pendadaran
           
-          # 2. Tarik update terbaru
-          echo "📥 Pulling latest code..."
-          git pull origin main
+#           # 2. Tarik update terbaru
+#           echo "📥 Pulling latest code..."
+#           git pull origin main
           
-          # 3. Update & Build Frontend
-          echo "🏗️ Building Frontend..."
-          cd frontend
-          npm install
-          npm run build
+#           # 3. Update & Build Frontend
+#           echo "🏗️ Building Frontend..."
+#           cd frontend
+#           npm install
+#           npm run build
           
-          # 4. Update Backend
-          echo "🔄 Updating Backend..."
-          cd ../backend
-          npm install
+#           # 4. Update Backend
+#           echo "🔄 Updating Backend..."
+#           cd ../backend
+#           npm install
           
-          # 5. Restart Aplikasi via PM2
-          echo "🚀 Restarting PM2..."
-          pm2 restart all || pm2 start server.js --name "jadwal-backend"
+#           # 5. Restart Aplikasi via PM2
+#           echo "🚀 Restarting PM2..."
+#           pm2 restart all || pm2 start server.js --name "jadwal-backend"
           
-          echo "✅ Deployment Success!"
+#           echo "✅ Deployment Success!"
+
+
+steps:
+- name: Executing remote ssh commands using key
+  uses: appleboy/ssh-action@v1.0.3
+  with:
+    host: ${{ secrets.SERVER_HOST }}
+    username: ${{ secrets.SERVER_USER }}
+    key: ${{ secrets.SSH_PRIVATE_KEY }}
+    script: |
+      # fail fast and print commands/outputs
+      set -euxo pipefail
+
+      echo "=== SSH connection OK: whoami & hostname ==="
+      whoami || true
+      hostname || true
+
+      echo "=== Check target directory ==="
+      TARGET=/var/www/jadwal-pendadaran
+      if [ ! -d "$TARGET" ]; then
+        echo "ERROR: target directory $TARGET does not exist"
+        exit 1
+      fi
+      cd "$TARGET"
+
+      echo "=== Git diagnostics ==="
+      git --version
+      git remote -v || true
+      git fetch --all --prune || { echo "git fetch failed"; exit 1; }
+      git status --porcelain || true
+      git pull origin main || { echo "git pull failed"; exit 1; }
+
+      echo "=== Frontend build ==="
+      if [ -d frontend ]; then
+        cd frontend
+        node -v || echo "WARNING: node not found"
+        npm -v || echo "WARNING: npm not found"
+        # prefer npm ci for reproducible installs; fallback to npm install
+        if command -v npm >/dev/null 2>&1; then
+          npm ci --prefer-offline --no-audit --progress=false || npm install
+          npm run build --if-present
+        else
+          echo "ERROR: npm not available on remote host"
+          exit 1
+        fi
+        cd ..
+      else
+        echo "WARN: frontend directory not present, skipping frontend build"
+      fi
+
+      echo "=== Backend update ==="
+      if [ -d backend ]; then
+        cd backend
+        if command -v npm >/dev/null 2>&1; then
+          npm ci --prefer-offline --no-audit --progress=false || npm install
+        else
+          echo "ERROR: npm not available on remote host"
+          exit 1
+        fi
+        cd ..
+      else
+        echo "WARN: backend directory not present, skipping backend install"
+      fi
+
+      echo "=== PM2 restart ==="
+      # locate pm2
+      PM2=$(command -v pm2 || true)
+      if [ -z "$PM2" ]; then
+        echo "pm2 not found in PATH. Trying common locations..."
+        if [ -x "$HOME/.npm-global/bin/pm2" ]; then
+          PM2="$HOME/.npm-global/bin/pm2"
+        elif [ -x "/usr/local/bin/pm2" ]; then
+          PM2="/usr/local/bin/pm2"
+        fi
+      fi
+      if [ -z "$PM2" ]; then
+        echo "ERROR: pm2 not found. Install it (e.g. npm i -g pm2) or add it to PATH."
+        exit 1
+      fi
+      echo "Using pm2 at: $PM2"
+      $PM2 resurrect || true
+      $PM2 restart all || $PM2 start server.js --name "jadwal-backend"
+
+      echo "✅ Deployment Success!"
