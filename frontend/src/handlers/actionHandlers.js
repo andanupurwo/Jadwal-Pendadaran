@@ -94,12 +94,12 @@ export function handleSearchInput(e) {
 
 export function handleProdiFilterChange(e) {
     appState.selectedProdiFilter = e.target.value;
-    refreshView('dosen');
+    refreshView(appState.currentView);
 }
 
 export function handleStatusFilterChange(e) {
     appState.selectedStatusFilter = e.target.value;
-    refreshView('dosen');
+    refreshView(appState.currentView);
 }
 
 export async function toggleDosenScheduling(faculty, nik) {

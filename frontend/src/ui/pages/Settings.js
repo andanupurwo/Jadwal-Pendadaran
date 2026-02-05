@@ -21,6 +21,11 @@ export const SettingsView = () => {
                      style="padding: 8px 24px; min-width: 120px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, color 0.2s; background: ${appState.settingsTab === 'logic' ? 'var(--bg)' : 'transparent'}; box-shadow: ${appState.settingsTab === 'logic' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};">
                     🧠 Logika
                 </div>
+                <div class="tab-item ${appState.settingsTab === 'about' ? 'active' : ''}"
+                     onclick="window.switchSettingsTab('about')"
+                     style="padding: 8px 24px; min-width: 120px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, color 0.2s; background: ${appState.settingsTab === 'about' ? 'var(--bg)' : 'transparent'}; box-shadow: ${appState.settingsTab === 'about' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};">
+                    ℹ️ About
+                </div>
              </div>
         </div>
     `;
@@ -38,6 +43,62 @@ export const SettingsView = () => {
                 ${renderTabs()}
                 <div style="margin-top: -2rem;">
                     ${LogicView().replace('class="container"', 'class="inner-container"').replace(/padding: 3rem 2rem 6rem;/, 'padding: 1rem 0;')}
+                </div>
+            </div>
+        `;
+    }
+
+    // Render About content
+    if (appState.settingsTab === 'about') {
+        return `
+            <div class="container">
+                <header class="page-header">
+                     <div class="header-info">
+                        <h1>Tentang Aplikasi</h1>
+                        <p class="subtitle">Informasi pengembang dan teknologi yang digunakan.</p>
+                    </div>
+                </header>
+                ${renderTabs()}
+                
+                <div class="card" style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--primary);">Jadwal Pendadaran AI</h2>
+                        <p style="color: var(--text-muted);">Sistem Penjadwalan Cerdas Berbasis Web v1.0</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                        <div>
+                            <h3 style="margin-bottom: 1rem; border-bottom: 2px solid var(--primary-subtle); padding-bottom: 0.5rem;">💻 Tech Stack</h3>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 8px;"><strong>Frontend:</strong> Javascript (Vanilla + Vite)</li>
+                                <li style="margin-bottom: 8px;"><strong>Backend:</strong> Node.js + Express</li>
+                                <li style="margin-bottom: 8px;"><strong>Database:</strong> PostgreSQL</li>
+                                <li style="margin-bottom: 8px;"><strong>Library:</strong> XLSX (Excel Processing)</li>
+                                <li style="margin-bottom: 8px;"><strong>Infrastructure:</strong> Debian (Proxmox Virtualization)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 style="margin-bottom: 1rem; border-bottom: 2px solid var(--primary-subtle); padding-bottom: 0.5rem;">👥 Credits</h3>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 12px;">
+                                    <strong>Diproduksi Oleh:</strong><br>
+                                    Staf DAAK (Direktorat Administrasi Akademik & Kemahasiswaan)
+                                </li>
+                                <li style="margin-bottom: 12px;">
+                                    <strong>Developed by:</strong><br>
+                                    <a href="#" style="color: var(--primary); text-decoration: none;">Agus_Intelligence</a>
+                                </li>
+                                <li style="margin-bottom: 12px;">
+                                    <strong>Supported by:</strong><br>
+                                    ilhamstu() & meansrev
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; padding-top: 1rem; border-top: 1px solid var(--border-subtle); font-size: 0.85rem; color: var(--text-muted);">
+                        &copy; 2026 Jadwal Pendadaran AI. All rights reserved.
+                    </div>
                 </div>
             </div>
         `;
@@ -115,34 +176,36 @@ export const SettingsView = () => {
                         <h3>📅 Tanggal Pelaksanaan</h3>
                     </div>
                     
-                    <div class="form-group" style="margin-bottom: 1.5rem; padding: 1.25rem; background: var(--bg); border: 1px solid var(--border-subtle); border-radius: 12px;">
-                        <label style="font-weight: 600; font-size: 0.95rem; margin-bottom: 1rem; display: block; color: var(--primary);">✨ Generator Tanggal Otomatis</label>
+                    <div class="form-group" style="margin-bottom: 1.5rem; padding: 1.5rem; background: var(--bg); border: 1px solid var(--border-subtle); border-radius: 12px;">
+                        <label style="font-weight: 600; font-size: 0.95rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; color: var(--primary);">
+                            ✨ Generator Tanggal Otomatis
+                        </label>
                         
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
                             <!-- Tanggal Mulai -->
-                            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                                <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Tanggal Mulai</label>
+                            <div style="width: 180px;">
+                                <label class="form-label" style="font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--text-secondary);">Tanggal Mulai</label>
                                 <input type="date" id="gen-start-date" class="form-input" style="width: 100%;">
                             </div>
 
                             <!-- Jumlah Hari -->
-                            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                                <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Jumlah Hari</label>
+                            <div style="width: 100px;">
+                                <label class="form-label" style="font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--text-secondary);">Jumlah Hari</label>
                                 <input type="number" id="gen-days" class="form-input" value="10" min="1" max="30" style="width: 100%;">
                             </div>
 
                             <!-- Opsi Weekend -->
-                            <div style="display: flex; align-items: center; padding-bottom: 0.6rem;">
+                            <div style="display: flex; align-items: center; height: 42px; padding-left: 0.5rem;">
                                 <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; user-select: none;">
-                                    <input type="checkbox" id="gen-skip-weekend" checked style="width: 16px; height: 16px; accent-color: var(--primary);">
+                                    <input type="checkbox" id="gen-skip-weekend" checked style="width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;">
                                     <span>Lewati Sabtu/Minggu</span>
                                 </label>
                             </div>
 
                             <!-- Tombol Action -->
-                            <div>
-                                <button type="button" id="btn-generate-dates" class="btn-primary" onclick="window.generateDateList()" style="width: 100%; justify-content: center;">
-                                    Generate List
+                            <div style="flex: 0 0 auto; margin-left: auto;">
+                                <button type="button" id="btn-generate-dates" class="btn-primary" onclick="window.generateDateList()" style="height: 42px; padding: 0 20px; font-size: 0.85rem;">
+                                    Generate
                                 </button>
                             </div>
                         </div>

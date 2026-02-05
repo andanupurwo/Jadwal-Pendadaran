@@ -20,7 +20,27 @@ export async function generateSchedule(options = { silent: false }) {
     const scopeEl = document.getElementById('scheduleScope');
     const incrementalEl = document.getElementById('incrementalMode');
     const targetProdi = scopeEl ? scopeEl.value : 'all';
-    const isIncremental = incrementalEl ? incrementalEl.checked : false;
+    let isIncremental = incrementalEl ? incrementalEl.checked : false;
+
+    // Override options (from checkbox handler)
+    if (options.overrideIncremental !== undefined) {
+        isIncremental = options.overrideIncremental;
+    }
+    // SAFETY CHECK: If triggered from outside Logic page (no checkbox) and data exists AND no override provided
+    else if (!incrementalEl && APP_DATA.slots && APP_DATA.slots.length > 0) {
+        // ... (keep existing prompt logic as fallback if needed) ...
+        const wantIncremental = await showConfirm(
+            'Terdapat jadwal yang sudah tersimpan. Apakah Anda ingin melanjutkan penjadwalan hanya untuk mahasiswa yang belum dapat jadwal (Incremental)?\n\nPilih "Batal" jika tidak ingin melakukan perubahan.',
+            'Lanjutkan Penjadwalan?',
+            { text: 'Ya, Lanjutkan (Aman)', variant: 'primary' }
+        );
+
+        if (wantIncremental) {
+            isIncremental = true;
+        } else {
+            return;
+        }
+    }
 
     logToLogic("🚀 MEMULAI PROSES PENJADWALAN OTOMATIS...");
     logToLogic(`⚙️ Mode: ${isIncremental ? 'INCREMENTAL' : 'RESET FULL'}`);

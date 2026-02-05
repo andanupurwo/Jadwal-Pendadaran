@@ -14,8 +14,10 @@ import './ui/components/Toast.js';
 import { isAuthenticated } from './services/auth.js';
 import './services/auth.js'; // Initialize auth handlers
 
+import { generateScheduleWithOptions } from './handlers/scheduleOptionsHandler.js';
+
 // Export to window for HTML access
-Object.assign(window, modals, actions, scheduleHandlers, { generateSchedule, navigate, getAllDosen });
+Object.assign(window, modals, actions, scheduleHandlers, { generateSchedule, navigate, getAllDosen, generateScheduleWithOptions });
 // Ensure new modal methods are available globally
 window.switchMahasiswaInputMode = modals.switchMahasiswaInputMode;
 window.handleMahasiswaCSVUpload = modals.handleMahasiswaCSVUpload;

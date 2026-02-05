@@ -7,11 +7,13 @@ export function navigate(page) {
 
     appState.currentView = page;
 
-    // Reset searching and sorting when navigating away from dosen page
-    if (page !== 'dosen') {
+    // Reset searching, sorting, and filters when navigating
+    if (appState.currentView !== page) {
         appState.sortColumn = null;
         appState.sortDirection = 'asc';
         appState.searchTerm = '';
+        appState.selectedProdiFilter = '';
+        appState.selectedStatusFilter = '';
     }
 
     // Update Active Link UI
