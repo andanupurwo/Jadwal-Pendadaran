@@ -225,14 +225,39 @@ git checkout update
 
 ## 🔗 Integrasi dengan Tools Lain
 
+### Google Antigravity (RECOMMENDED):
+Gunakan slash commands (`/jarvis-out`, `/jarvis-in`, `/jarvis-merge`) langsung di chat
+
+### Terminal (Bash/Zsh):
+Anda juga bisa menggunakan Jarvis langsung di terminal!
+
+**Setup (Hanya Sekali):**
+```bash
+# Tambahkan alias ke ~/.zshrc
+echo 'source /Users/purwo/VibeCoding/jadwal_pendadaran/.jarvis/aliases.zsh' >> ~/.zshrc
+
+# Reload terminal
+source ~/.zshrc
+```
+
+**Setelah setup, gunakan langsung:**
+```bash
+jarvis-out    # Save dan push ke GitHub
+jarvis-in     # Pull dari GitHub
+jarvis-merge  # Buat Pull Request
+```
+
+**Tanpa setup (langsung jalankan script):**
+```bash
+bash .jarvis/jarvis-out.sh
+bash .jarvis/jarvis-in.sh
+bash .jarvis/jarvis-merge.sh
+```
+
+📚 **Detail lengkap:** Lihat [.jarvis/README.md](file:///Users/purwo/VibeCoding/jadwal_pendadaran/.jarvis/README.md)
+
 ### VS Code:
 Workflows ini kompatibel dengan VS Code di Windows dan Mac
-
-### Google Antigravity:
-Gunakan slash commands (`/jarvis-out`, `/jarvis-in`, `/jarvis-merge`)
-
-### Terminal:
-Bisa juga dijalankan manual jika perlu
 
 ---
 
