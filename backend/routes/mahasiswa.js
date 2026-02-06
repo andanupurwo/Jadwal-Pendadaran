@@ -9,7 +9,8 @@ router.post('/', mahasiswaController.createMahasiswa);
 router.put('/:nim', mahasiswaController.updateMahasiswa);
 
 // IMPORTANT: Static routes must come BEFORE dynamic routes (like :nim)
-router.delete('/all', mahasiswaController.deleteAllMahasiswa);
+// Menggunakan multi-segment path agar tidak bentrok dengan /:nim
+router.delete('/action/destroy-all', mahasiswaController.deleteAllMahasiswa);
 router.delete('/:nim', mahasiswaController.deleteMahasiswa);
 router.post('/bulk', mahasiswaController.bulkCreateMahasiswa);
 
