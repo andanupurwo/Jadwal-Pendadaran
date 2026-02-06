@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.post('/login', authController.login);
 router.get('/me', authController.verifyToken, authController.me);
-router.post('/change-password', authController.verifyToken, authController.changePassword);
+router.post('/update-account', authController.verifyToken, authController.updateAccount);
 
 export default router;

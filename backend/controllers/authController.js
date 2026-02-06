@@ -72,13 +72,13 @@ export async function me(req, res) {
     res.json({ success: true, user: req.user });
 }
 
-export async function changePassword(req, res) {
+export async function updateAccount(req, res) {
     try {
-        const { currentPassword, newPassword } = req.body;
+        const { currentPassword, newUsername, newPassword } = req.body;
         const userId = req.user.id; // From verifyToken middleware
 
-        if (!currentPassword || !newPassword) {
-            return res.status(400).json({ success: false, error: 'Password lama dan baru harus diisi' });
+        if (!currentPassword) {
+            return res.status(400).json({ success: false, error: 'Password lama diperlukan untuk konfirmasi' });
         }
 
         // Get user from DB to verify old password
@@ -95,16 +95,41 @@ export async function changePassword(req, res) {
             return res.status(400).json({ success: false, error: 'Password lama salah' });
         }
 
-        // Hash new password
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        let query = 'UPDATE users SET ';
+        const params = [];
+        let paramIndex = 1;
+        const updates = [];
 
-        // Update password
-        await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedPassword, userId]);
+        // Handle Username Update
+        if (newUsername && newUsername !== user.username) {
+            // Check uniqueness
+            const existing = await pool.query('SELECT id FROM users WHERE username = $1', [newUsername]);
+            if (existing.rows.length > 0) {
+                return res.status(400).json({ success: false, error: 'Username sudah digunakan' });
+            }
+            updates.push(`username = $${paramIndex++}`);
+            params.push(newUsername);
+        }
 
-        res.json({ success: true, message: 'Password berhasil diubah' });
+        // Handle Password Update
+        if (newPassword) {
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            updates.push(`password = $${paramIndex++}`);
+            params.push(hashedPassword);
+        }
+
+        if (updates.length > 0) {
+            query += updates.join(', ');
+            query += ` WHERE id = $${paramIndex}`;
+            params.push(userId);
+            await pool.query(query, params);
+            res.json({ success: true, message: 'Akun berhasil diperbarui' });
+        } else {
+            res.json({ success: true, message: 'Tidak ada perubahan disimpan' });
+        }
 
     } catch (error) {
-        console.error('Change password error:', error);
+        console.error('Update account error:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
     }
 }

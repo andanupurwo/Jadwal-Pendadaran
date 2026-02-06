@@ -37,10 +37,12 @@ export const SettingsView = () => {
 
     // Render Account content
     if (appState.settingsTab === 'account') {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+
         setTimeout(() => {
-            const form = document.getElementById('change-password-form');
+            const form = document.getElementById('account-update-form');
             if (form) {
-                form.addEventListener('submit', handleChangePassword);
+                form.addEventListener('submit', handleUpdateAccount);
             }
         }, 0);
 
@@ -56,24 +58,37 @@ export const SettingsView = () => {
                 
                 <div class="card" style="max-width: 600px; margin: 0 auto;">
                     <div class="card-header">
-                        <h3>🔑 Ganti Password</h3>
+                        <h3>👤 Update Akun</h3>
                     </div>
-                    <form id="change-password-form" style="padding: 1.5rem;">
+                    <form id="account-update-form" style="padding: 1.5rem;">
                         <div class="form-group">
-                            <label class="form-label">Password Lama</label>
-                            <input type="password" name="currentPassword" class="form-input" required placeholder="••••••">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="username" class="form-input" required value="${user.username || ''}">
+                            <p class="form-hint">Ganti username jika diperlukan</p>
                         </div>
+
+                        <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border);">
+                        
                         <div class="form-group">
-                            <label class="form-label">Password Baru</label>
-                            <input type="password" name="newPassword" class="form-input" required placeholder="••••••" minlength="6">
-                            <p class="form-hint">Minimal 6 karakter</p>
+                            <label class="form-label">Password Baru (Opsional)</label>
+                            <input type="password" name="newPassword" class="form-input" placeholder="••••••" minlength="6">
+                            <p class="form-hint">Kosongkan jika tidak ingin mengganti password</p>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Konfirmasi Password Baru</label>
-                            <input type="password" name="confirmNewPassword" class="form-input" required placeholder="••••••">
+                            <input type="password" name="confirmNewPassword" class="form-input" placeholder="••••••">
                         </div>
+
+                        <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border);">
+
+                        <div class="form-group" style="background: var(--bg); padding: 1rem; border-radius: 8px;">
+                            <label class="form-label" style="color: var(--danger);">Password Lama (Konfirmasi)</label>
+                            <input type="password" name="currentPassword" class="form-input" required placeholder="••••••">
+                            <p class="form-hint">Masukkan password saat ini untuk menyimpan perubahan</p>
+                        </div>
+
                         <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
-                            Update Password
+                            Simpan Perubahan
                         </button>
                     </form>
                 </div>
@@ -377,36 +392,47 @@ async function handleSettingsSubmit(e) {
 }
 
 
-async function handleChangePassword(e) {
+async function handleUpdateAccount(e) {
     e.preventDefault();
 
     const formData = new FormData(e.target);
     const currentPassword = formData.get('currentPassword');
+    const newUsername = formData.get('username');
     const newPassword = formData.get('newPassword');
     const confirmNewPassword = formData.get('confirmNewPassword');
 
-    if (newPassword !== confirmNewPassword) {
+    if (newPassword && newPassword !== confirmNewPassword) {
         showToast('Konfirmasi password baru tidak cocok!', 'error');
         return;
     }
 
-    if (!(await showConfirm('Anda yakin ingin mengubah password?', 'Ganti Password', { text: 'Ubah', variant: 'warning' }))) return;
+    if (!(await showConfirm('Simpan perubahan akun?', 'Update Akun', { text: 'Simpan', variant: 'primary' }))) return;
 
     try {
-        const response = await authAPI.changePassword(currentPassword, newPassword);
+        const response = await authAPI.updateAccount({
+            currentPassword,
+            newUsername,
+            newPassword: newPassword || undefined
+        });
 
         if (response.success) {
-            showToast('Password berhasil diubah! Silakan login ulang.', 'success');
+            showToast('Akun berhasil diperbarui! Silakan login ulang.', 'success');
+
+            // Update local storage user if username changed
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            user.username = newUsername;
+            localStorage.setItem('user', JSON.stringify(user));
+
             setTimeout(() => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 window.location.reload();
             }, 1500);
         } else {
-            showToast(response.error || 'Gagal mengubah password', 'error');
+            showToast(response.error || 'Gagal memperbarui akun', 'error');
         }
     } catch (error) {
-        console.error('Change password error:', error);
-        showToast('Terjadi kesalahan saat mengubah password', 'error');
+        console.error('Update account error:', error);
+        showToast('Terjadi kesalahan saat memperbarui akun', 'error');
     }
 }

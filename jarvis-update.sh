@@ -44,6 +44,8 @@ if [ -d "backend" ]; then
     cd backend
     echo "   Running npm install (Backend)..."
     npm install
+    echo "   Initializing Database (Migrations)..."
+    npm run init-db
     cd ..
 else
     echo "❌ Error: Directory 'backend' not found!"
