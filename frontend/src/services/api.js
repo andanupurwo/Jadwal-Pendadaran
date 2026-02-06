@@ -43,7 +43,7 @@ export const mahasiswaAPI = {
     delete: (nim) => apiRequest(`/mahasiswa/${nim}`, {
         method: 'DELETE'
     }),
-    deleteAll: () => apiRequest('/mahasiswa/all', {
+    deleteAll: () => apiRequest('/mahasiswa/action/destroy-all', {
         method: 'DELETE'
     }),
     bulkCreate: (mahasiswa) => apiRequest('/mahasiswa/bulk', {
