@@ -28,10 +28,10 @@ export async function scheduleIndividualStudent(nim) {
 
         showToast(`Berhasil menjadwalkan ${student.nama}`, 'success');
 
-        // Navigate to home to see the result
+        // Refresh view to show updated status (stay on mahasiswa page)
         setTimeout(() => {
-            navigate('home');
-        }, 1000);
+            navigate('mahasiswa');
+        }, 500);
 
     } catch (error) {
         console.error('Error scheduling student:', error);

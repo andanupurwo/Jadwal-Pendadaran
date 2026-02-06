@@ -30,14 +30,44 @@ export const MahasiswaView = () => {
     // 2. Sorting Logic
     const sorted = sortData(data, appState.sortColumn || 'nim', appState.sortDirection);
 
+    // Prepare validator for Dosen Names
+    const validDosenNames = new Set();
+    if (APP_DATA.facultyData) {
+        Object.values(APP_DATA.facultyData).forEach(list => {
+            if (Array.isArray(list)) list.forEach(d => validDosenNames.add(d.nama));
+        });
+    }
+
     // 3. Prepare Table Rows
     const rows = sorted.map(m => {
         const sched = APP_DATA.slots.find(s => s.student === m.nama);
+
+        // Validate Pembimbing
+        // If pembimbing exists but is NOT in our valid list, mark it red
+        const isUnknown = m.pembimbing && !validDosenNames.has(m.pembimbing);
+
+        let pembimbingDisplay = '';
+        if (!m.pembimbing) {
+            pembimbingDisplay = `<div style="display:flex; align-items:center; gap:6px;">
+                <span style="color:var(--danger); font-style:italic;">Belum Ada</span>
+                <button onclick="window.openEditMahasiswa('${m.nim}')" class="btn-icon" style="width:24px; height:24px; font-size:12px; background:var(--bg-secondary); border-radius:4px;" title="Tambah Pembimbing">➕</button>
+            </div>`;
+        } else {
+            pembimbingDisplay = `
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                    <span style="color:${isUnknown ? 'var(--danger)' : 'inherit'}; font-weight:${isUnknown ? '800' : '500'}; ${isUnknown ? 'border-bottom:1px dashed var(--danger);' : ''}" title="${isUnknown ? 'Data tidak valid!' : ''}">
+                        ${m.pembimbing}${isUnknown ? ' (?)' : ''}
+                    </span>
+                    <button onclick="window.openEditMahasiswa('${m.nim}')" class="btn-icon" style="color:var(--text-secondary); padding:4px; font-size:14px;" title="Edit Data Mahasiswa">✏️</button>
+                </div>
+            `;
+        }
+
         return [
             `<div style="font-family:monospace; font-weight:600;">${m.nim}</div>`,
             `<strong>${m.nama}</strong>`,
             `<span class="badge" style="background:rgba(0,0,0,0.05); color:var(--text-main); font-weight:600;">${m.prodi}</span>`,
-            m.pembimbing || '<span style="color:var(--danger); font-style:italic;">Belum Ada</span>',
+            pembimbingDisplay,
             sched
                 ? `<div onclick="window.viewAndHighlightSchedule('${m.nama}')" class="badge-success" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
                         <span style="font-size:12px;">📅</span> ${sched.date} (${sched.time})
