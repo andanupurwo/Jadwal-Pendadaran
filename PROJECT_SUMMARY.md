@@ -97,7 +97,7 @@ jadwal-pendadaran/
 - ✅ `frontend/README.md` - Frontend-specific documentation
 - ✅ `docs/API.md` - Complete API documentation
 - ✅ `docs/ARCHITECTURE.md` - System architecture & diagrams
-- ✅ `docs/DEPLOYMENT.md` - Production deployment guide (Debian + Nginx + PM2)
+- ✅ `docs/REFACTORING.md` - Refactoring notes and changes
 
 ### Utilities
 
@@ -311,7 +311,7 @@ All documentation is comprehensive and production-ready:
 2. **QUICKSTART.md** - Step-by-step setup with troubleshooting
 3. **docs/API.md** - Complete API reference with examples
 4. **docs/ARCHITECTURE.md** - System architecture diagrams & flows
-5. **docs/DEPLOYMENT.md** - Production deployment (Debian + Nginx + PM2)
+4. **docs/REFACTORING.md** - Refactoring notes
 6. **backend/README.md** - Backend setup & development
 7. **frontend/README.md** - Frontend setup & development
 
@@ -393,7 +393,7 @@ All documentation is comprehensive and production-ready:
 - ✅ **Full Documentation** - Production-ready guides
 - ✅ **Database Schema** - Normalized & indexed
 - ✅ **REST API** - Complete with 20+ endpoints
-- ✅ **Deployment Ready** - Debian + Nginx + PM2 guide
+- ✅ **Documentation Ready** - Complete system docs
 - ✅ **Automated Setup** - setup.sh script
 
 ---

@@ -236,7 +236,7 @@ After successful setup:
 - **[README.md](../README.md)** - Project overview
 - **[API.md](../docs/API.md)** - API documentation
 - **[ARCHITECTURE.md](../docs/ARCHITECTURE.md)** - System architecture
-- **[DEPLOYMENT.md](../docs/DEPLOYMENT.md)** - Production deployment
+- **[REFACTORING.md](../docs/REFACTORING.md)** - Refactoring notes
 - **[Backend README](../backend/README.md)** - Backend details
 - **[Frontend README](../frontend/README.md)** - Frontend details
 
