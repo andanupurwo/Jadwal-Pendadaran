@@ -169,16 +169,17 @@ export async function deleteLibur(dosenId) {
 export async function wipeMahasiswaData() {
     if (await showConfirm('Hapus SEMUA data mahasiswa dan jadwal dari DATABASE?', 'Konfirmasi Bahaya!')) {
         try {
-            const { mahasiswaAPI, slotsAPI } = await import('../services/api.js');
-            await slotsAPI.deleteAll();
-            // Kita hapus satu per satu karena NIM adalah kunci
-            for (const mhs of APP_DATA.mahasiswa) {
-                await mahasiswaAPI.delete(mhs.nim);
+            const { mahasiswaAPI } = await import('../services/api.js');
+
+            // Use the atomic delete all endpoint
+            const response = await mahasiswaAPI.deleteAll();
+
+            if (response.success) {
+                APP_DATA.mahasiswa = [];
+                APP_DATA.slots = [];
+                refreshView('mahasiswa');
+                showToast('Semua data mahasiswa dan jadwal telah dihapus.', 'success');
             }
-            APP_DATA.mahasiswa = [];
-            APP_DATA.slots = [];
-            refreshView('mahasiswa');
-            showToast('Semua data mahasiswa telah dihapus.', 'success');
         } catch (error) {
             showToast('Gagal menghapus data: ' + error.message, 'error');
         }

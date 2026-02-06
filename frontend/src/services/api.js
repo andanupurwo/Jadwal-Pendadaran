@@ -43,6 +43,9 @@ export const mahasiswaAPI = {
     delete: (nim) => apiRequest(`/mahasiswa/${nim}`, {
         method: 'DELETE'
     }),
+    deleteAll: () => apiRequest('/mahasiswa/all', {
+        method: 'DELETE'
+    }),
     bulkCreate: (mahasiswa) => apiRequest('/mahasiswa/bulk', {
         method: 'POST',
         body: JSON.stringify({ mahasiswa })

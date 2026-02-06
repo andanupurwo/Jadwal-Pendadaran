@@ -30,6 +30,9 @@ window.saveNewMasterDosen = modals.saveNewMasterDosen;
 window.deleteMasterDosen = modals.deleteMasterDosen;
 window.clearAllSchedule = actions.clearAllSchedule;
 window.exportScheduleToCSV = actions.exportScheduleToCSV;
+// Edit Mahasiswa (Generalized)
+window.openEditMahasiswa = modals.openEditMahasiswa;
+window.saveMahasiswa = modals.saveMahasiswa;
 
 async function initializeApp() {
     // Check authentication first
