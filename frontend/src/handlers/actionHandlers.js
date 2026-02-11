@@ -1,4 +1,9 @@
-import { APP_DATA, appState, saveMahasiswaToStorage, saveLiburToStorage, saveExcludedDosenToStorage } from '../data/store.js';
+import { APP_DATA, appState, saveMahasiswaToStorage, saveLiburToStorage, saveExcludedDosenToStorage, loadLiburFromAPI } from '../data/store.js';
+
+// ...
+
+// Fetch fresh data from server and use store logic for grouping
+await loadLiburFromAPI();
 import { INITIAL_LIBUR } from '../data/initialLibur.js';
 import * as views from '../ui/pages/index.js';
 import { navigate } from '../ui/core/router.js';
@@ -147,20 +152,24 @@ export async function resetLiburData() {
     }
 }
 
-export async function deleteLibur(dosenId) {
-    if (!(await showConfirm('Hapus semua aturan libur untuk dosen ini?'))) return;
+export async function deleteLiburGroup(idsString) {
+    if (!idsString) return;
+    if (!(await showConfirm('Hapus aturan ini?'))) return;
+
     try {
         const { liburAPI } = await import('../services/api.js');
+        const ids = idsString.split(',').filter(id => id);
 
-        // Delete all libur entries for this dosen from database
-        const response = await liburAPI.deleteByNik(dosenId);
+        // Delete each ID individually
+        const deletePromises = ids.map(id => liburAPI.delete(id));
+        await Promise.all(deletePromises);
 
-        if (response.success) {
-            // Remove from local state
-            APP_DATA.libur = APP_DATA.libur.filter(l => l.dosenId !== dosenId);
-            refreshView('libur');
-            showToast('Aturan libur berhasil dihapus', 'success');
-        }
+        // Fetch fresh data from server and use store logic for grouping
+        await loadLiburFromAPI();
+
+        refreshView('libur');
+        showToast('Aturan berhasil dihapus', 'success');
+
     } catch (error) {
         showToast('Gagal menghapus data libur: ' + error.message, 'error');
     }

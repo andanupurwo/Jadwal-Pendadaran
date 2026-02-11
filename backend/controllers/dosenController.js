@@ -20,7 +20,8 @@ export async function getAllDosen(req, res) {
                     nama: dosen.nama,
                     prodi: dosen.prodi,
                     fakultas: dosen.fakultas,
-                    exclude: Boolean(dosen.exclude)
+                    exclude: Boolean(dosen.exclude),
+                    pref_gender: dosen.pref_gender || null // Add this
                 });
             }
         });
@@ -52,7 +53,7 @@ export async function toggleExcludeDosen(req, res) {
         const { exclude } = req.body;
 
         const { rowCount } = await pool.query(
-            'UPDATE dosen SET excluded = $1 WHERE nik = $2',
+            'UPDATE dosen SET exclude = $1 WHERE nik = $2',
             [exclude ? true : false, nik]
         );
 
@@ -88,11 +89,11 @@ export async function bulkInsertDosen(req, res) {
 
             try {
                 await client.query(
-                    `INSERT INTO dosen (nik, nama, prodi, fakultas, excluded) 
-                     VALUES ($1, $2, $3, $4, $5) 
+                    `INSERT INTO dosen (nik, nama, prodi, fakultas, exclude, pref_gender) 
+                     VALUES ($1, $2, $3, $4, $5, $6) 
                      ON CONFLICT (nik) 
-                     DO UPDATE SET nama = EXCLUDED.nama, prodi = EXCLUDED.prodi, fakultas = EXCLUDED.fakultas`,
-                    [d.nik, d.nama, d.prodi || '', d.fakultas, false]
+                     DO UPDATE SET nama = EXCLUDED.nama, prodi = EXCLUDED.prodi, fakultas = EXCLUDED.fakultas, pref_gender = EXCLUDED.pref_gender`,
+                    [d.nik, d.nama, d.prodi || '', d.fakultas, false, d.pref_gender || null]
                 );
                 insertedCount++;
             } catch (err) {
@@ -230,6 +231,28 @@ export async function deleteMasterDosen(req, res) {
         res.json({ success: true, message: 'Data Master SDM berhasil dihapus.' });
     } catch (error) {
         console.error('Error deleting master dosen:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+// Update dosen
+export async function updateDosen(req, res) {
+    try {
+        const { nik } = req.params;
+        const { nama, prodi, fakultas, pref_gender } = req.body;
+
+        const { rowCount } = await pool.query(
+            'UPDATE dosen SET nama = $1, prodi = $2, fakultas = $3, pref_gender = $4 WHERE nik = $5',
+            [nama, prodi, fakultas, pref_gender || null, nik]
+        );
+
+        if (rowCount === 0) {
+            return res.status(404).json({ success: false, error: 'Dosen not found' });
+        }
+
+        res.json({ success: true, data: { nik, nama, prodi, fakultas, pref_gender } });
+    } catch (error) {
+        console.error('Error updating dosen:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 }

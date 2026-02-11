@@ -1,4 +1,5 @@
 import pool from '../config/database.js';
+import { createLog } from './logsController.js';
 
 // Get all libur
 export async function getAllLibur(req, res) {
@@ -14,7 +15,7 @@ export async function getAllLibur(req, res) {
 // Create libur entry
 export async function createLibur(req, res) {
     try {
-        const { date, time, room, reason } = req.body;
+        const { date, time, room, reason, nik } = req.body;
 
         // At least one of date or time must be provided
         if (!date && !time) {
@@ -23,13 +24,24 @@ export async function createLibur(req, res) {
 
         const { rows } = await pool.query(
             'INSERT INTO libur (date, time, room, reason, nik) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [date || null, time || null, room || null, reason || '', req.body.nik || null]
+            [date || null, time || null, room || null, reason || '', nik || null]
         );
 
         res.status(201).json({
             success: true,
             data: rows[0]
         });
+
+        // Fetch nama dosen for better log
+        let namaDosen = nik;
+        try {
+            const { rows: d } = await pool.query('SELECT nama FROM dosen WHERE nik = $1', [nik]);
+            if (d.length > 0) namaDosen = d[0].nama;
+        } catch (e) { }
+
+        const infoWaktu = date ? (time ? `${date} jam ${time}` : `tanggal ${date}`) : `jam ${time}`;
+        await createLog('CREATE', 'Ketersediaan Dosen', `Menandai ${namaDosen} TIDAK BERSEDIA pada ${infoWaktu} (${reason || 'Tanpa Alasan'})`);
+
     } catch (error) {
         console.error('Error creating libur:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -41,6 +53,23 @@ export async function deleteLibur(req, res) {
     try {
         const { id } = req.params;
 
+        // Get details before delete for logging
+        let logDetail = `aturan libur ID: ${id}`;
+        try {
+            const { rows: old } = await pool.query(
+                `SELECT l.*, d.nama 
+                 FROM libur l 
+                 LEFT JOIN dosen d ON l.nik = d.nik 
+                 WHERE l.id = $1`,
+                [id]
+            );
+            if (old.length > 0) {
+                const item = old[0];
+                const infoWaktu = item.date ? (item.time ? `${item.date} jam ${item.time}` : `tanggal ${item.date}`) : `jam ${item.time}`;
+                logDetail = `aturan ${item.nama || item.nik} pada ${infoWaktu}`;
+            }
+        } catch (e) { }
+
         const { rowCount } = await pool.query('DELETE FROM libur WHERE id = $1', [id]);
 
         if (rowCount === 0) {
@@ -48,6 +77,9 @@ export async function deleteLibur(req, res) {
         }
 
         res.json({ success: true, message: 'Libur entry deleted successfully' });
+
+        await createLog('DELETE', 'Ketersediaan Dosen', `Menghapus status tidak bersedia: ${logDetail}`);
+
     } catch (error) {
         console.error('Error deleting libur:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -70,6 +102,8 @@ export async function deleteLiburByNik(req, res) {
             message: `Deleted ${rowCount} libur entries for dosen ${nik}`,
             deleted: rowCount
         });
+
+        await createLog('DELETE', 'Jadwal Libur', `Menghapus SEMUA aturan libur untuk NIK: ${nik}`);
     } catch (error) {
         console.error('Error deleting libur by NIK:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -85,6 +119,8 @@ export async function deleteAllLibur(req, res) {
             message: `All libur data cleared. Deleted ${rowCount} entries.`,
             deleted: rowCount
         });
+
+        await createLog('DELETE ALL', 'Jadwal Libur', `Membersihkan SEMUA data aturan libur (${rowCount} baris)`);
     } catch (error) {
         console.error('Error deleting all libur:', error);
         res.status(500).json({ success: false, error: error.message });

@@ -75,8 +75,8 @@ export const LiburView = () => {
             renderConstraint(l),
             `<span style="color:var(--text-muted); font-size:0.9rem;">${l.reason || '-'}</span>`,
             `<div style="text-align:center;">
-                <button onclick="window.toggleAddLiburModal(true, ${actualIdx})" class="btn-icon" style="color:var(--primary); margin-right:8px;">✏️</button>
-                <button onclick="window.deleteLibur('${l.dosenId}')" class="btn-icon" style="color:var(--danger);">🗑️</button>
+                <button onclick="window.editLiburGroup('${l.ids ? l.ids.join(',') : ''}')" class="btn-icon" style="color:var(--primary); margin-right:8px;">✏️</button>
+                <button onclick="window.deleteLiburGroup('${l.ids ? l.ids.join(',') : ''}')" class="btn-icon" style="color:var(--danger);">🗑️</button>
              </div>`
         ];
     });

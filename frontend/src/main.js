@@ -33,6 +33,10 @@ window.exportScheduleToCSV = actions.exportScheduleToCSV;
 // Edit Mahasiswa (Generalized)
 window.openEditMahasiswa = modals.openEditMahasiswa;
 window.saveMahasiswa = modals.saveMahasiswa;
+// Manual Schedule
+window.toggleManualScheduleModal = modals.toggleManualScheduleModal;
+window.updateManualDosenOptions = modals.updateManualDosenOptions;
+window.submitManualSchedule = modals.submitManualSchedule;
 
 async function initializeApp() {
     // Check authentication first

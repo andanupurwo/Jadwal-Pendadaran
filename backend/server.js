@@ -10,6 +10,7 @@ import slotsRoutes from './routes/slots.js';
 import scheduleRoutes from './routes/schedule.js';
 import settingsRoutes from './routes/settings.js';
 import authRoutes from './routes/auth.js';
+import logsRoutes from './routes/logs.js';
 
 // Import database
 import pool from './config/database.js';
@@ -44,6 +45,7 @@ app.use('/api/slots', slotsRoutes);
 app.use('/api/schedule', scheduleRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/logs', logsRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -63,7 +65,17 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+    // Auto-migration: Ensure gender column exists in mahasiswa
+    try {
+        await pool.query(`ALTER TABLE mahasiswa ADD COLUMN IF NOT EXISTS gender VARCHAR(10)`);
+        // New: Add pref_gender column to dosen
+        await pool.query(`ALTER TABLE dosen ADD COLUMN IF NOT EXISTS pref_gender VARCHAR(1)`);
+        console.log('✅ Database Schema verified: gender columns exist');
+    } catch (e) {
+        console.error('⚠️ Database Schema Check Failed:', e.message);
+    }
+
     console.log('');
     console.log('================================================');
     console.log('🚀 Jadwal Pendadaran Backend API');

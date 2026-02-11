@@ -70,6 +70,10 @@ export const dosenAPI = {
     delete: (nik) => apiRequest(`/dosen/${nik}`, {
         method: 'DELETE'
     }),
+    update: (nik, data) => apiRequest(`/dosen/${nik}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+    }),
     bulkInsert: (dosen) => apiRequest('/dosen/bulk', {
         method: 'POST',
         body: JSON.stringify({ dosen })
@@ -131,6 +135,10 @@ export const scheduleAPI = {
     moveSlot: (slotId, newDate, newTime, newRoom) => apiRequest('/schedule/move', {
         method: 'POST',
         body: JSON.stringify({ slotId, newDate, newTime, newRoom })
+    }),
+    createManual: (data) => apiRequest('/schedule/create-manual', {
+        method: 'POST',
+        body: JSON.stringify(data)
     })
 };
 
@@ -160,6 +168,14 @@ export const authAPI = {
             headers: { 'Authorization': `Bearer ${token}` }
         });
     }
+};
+
+// Logs API
+export const logsAPI = {
+    getAll: () => apiRequest('/logs'),
+    clear: () => apiRequest('/logs', {
+        method: 'DELETE'
+    })
 };
 
 // Health Check

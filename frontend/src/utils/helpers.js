@@ -44,6 +44,11 @@ export function sortData(data, column, direction = null) {
         let valA = a[column];
         let valB = b[column];
 
+        // Handle nulls/undefined always last (or first)
+        if (valA === valB) return 0;
+        if (valA === null || valA === undefined || valA === '') return 1; // Empty values at bottom
+        if (valB === null || valB === undefined || valB === '') return -1;
+
         // Handle boolean sorting for exclude (OFF/ON)
         if (column === 'exclude') {
             valA = valA ? 1 : 0;

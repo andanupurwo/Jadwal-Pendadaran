@@ -11,5 +11,6 @@ router.post('/bulk', dosenController.bulkInsertDosen);
 router.get('/master', dosenController.getMasterDosen);
 router.post('/master/bulk', dosenController.bulkInsertMasterDosen);
 router.delete('/master/:nik', dosenController.deleteMasterDosen);
+router.put('/:nik', dosenController.updateDosen);
 
 export default router;

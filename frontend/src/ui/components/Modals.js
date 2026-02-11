@@ -1,4 +1,10 @@
-import { APP_DATA, appState, DATES, TIMES, saveMahasiswaToStorage, saveLiburToStorage } from '../../data/store.js';
+import { APP_DATA, appState, DATES, TIMES, saveMahasiswaToStorage, saveLiburToStorage, loadLiburFromAPI } from '../../data/store.js';
+
+// ... (existing code but skipping for brevity in replacement chunk)
+
+// Update local state - Fetch fresh data from server to ensure accuracy
+// instead of manual merging wwhich causes confusion
+await loadLiburFromAPI();
 import { getAllDosen } from '../../utils/helpers.js';
 import * as views from '../pages/index.js';
 import { showConfirm } from './ConfirmationModal.js';
@@ -48,7 +54,7 @@ export function toggleAddMahasiswaModal(show, studentData = null) {
              <div style="text-align:center; padding:2rem; background:rgba(0,0,0,0.02); border-radius:12px; border:2px dashed var(--border);">
                  <div style="font-size:3rem; margin-bottom:1rem;">📂</div>
                  <p style="margin-bottom:1rem; font-weight:600;">Upload file CSV Mahasiswa</p>
-                 <code style="display:block; background:white; padding:10px; border-radius:8px; margin-bottom:1rem; font-size:0.85rem;">No,NIM,Nama,Prodi,Pembimbing</code>
+                 <code style="display:block; background:white; padding:10px; border-radius:8px; margin-bottom:1rem; font-size:0.85rem;">No,NIM,Nama,Prodi,Pembimbing,Gender(L/P)</code>
                  <button type="button" onclick="document.getElementById('csvMahasiswaInput').click()" class="btn-primary">Pilih File CSV</button>
                  <input type="file" id="csvMahasiswaInput" accept=".csv" style="display:none;" onchange="window.handleMahasiswaCSVUpload(event)">
              </div>
@@ -73,6 +79,17 @@ export function toggleAddMahasiswaModal(show, studentData = null) {
                     <div class="form-group">
                         <label>Nama Lengkap</label>
                         <input type="text" name="nama" class="form-input" required value="${data.nama}" placeholder="Nama Mahasiswa">
+                    </div>
+                    <div class="form-group">
+                        <label>Jenis Kelamin</label>
+                        <div style="display:flex; gap:15px; padding:8px 0;">
+                            <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                                <input type="radio" name="gender" value="L" ${data.gender === 'L' ? 'checked' : ''}> Laki-laki
+                            </label>
+                            <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                                <input type="radio" name="gender" value="P" ${data.gender === 'P' ? 'checked' : ''}> Perempuan
+                            </label>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Program Studi</label>
@@ -163,9 +180,10 @@ export function handleMahasiswaCSVUpload(e) {
             const nama = fields[2];
             const prodi = fields[3] || 'Informatika';
             const pembimbing = fields[4] || '';
+            const gender = fields[5] ? fields[5].toUpperCase().trim() : null; // Asumsi kolom ke-6 adalah gender
 
             if (nim && nama) {
-                dataToUpload.push({ nim, nama, prodi, pembimbing });
+                dataToUpload.push({ nim, nama, prodi, pembimbing, gender });
             }
         }
 
@@ -202,6 +220,7 @@ export async function saveMahasiswa(e, isEdit) {
     const nama = formData.get('nama');
     const prodi = formData.get('prodi');
     const pembimbing = formData.get('pembimbing');
+    const gender = formData.get('gender');
 
     // Validation (Create only)
     if (!isEdit && APP_DATA.mahasiswa.some(m => m.nim === nim)) return showToast('NIM sudah terdaftar!', 'warning');
@@ -211,20 +230,18 @@ export async function saveMahasiswa(e, isEdit) {
 
         let response;
         if (isEdit) {
-            response = await mahasiswaAPI.update(nim, { nama, prodi, pembimbing });
+            response = await mahasiswaAPI.update(nim, { nama, prodi, pembimbing, gender });
         } else {
-            response = await mahasiswaAPI.create({ nim, nama, prodi, pembimbing });
+            response = await mahasiswaAPI.create({ nim, nama, prodi, pembimbing, gender });
         }
 
         if (response.success) {
             // Update local state is cumbersome, better to refresh or simple update
             if (isEdit) {
                 const idx = APP_DATA.mahasiswa.findIndex(m => m.nim === nim);
-                if (idx !== -1) APP_DATA.mahasiswa[idx] = response.data; // might differ slightly structure-wise
-                // Actually helper API returns simplified or full row. 
-                // Let's assume re-fetching or manually updating is fine.
-                // Re-fetch all to be safe? Or just update.
-                APP_DATA.mahasiswa[idx] = { ...APP_DATA.mahasiswa[idx], nama, prodi, pembimbing };
+                if (idx !== -1) {
+                    APP_DATA.mahasiswa[idx] = { ...APP_DATA.mahasiswa[idx], nama, prodi, pembimbing, gender };
+                }
             } else {
                 APP_DATA.mahasiswa.push(response.data);
             }
@@ -356,6 +373,14 @@ export async function saveNewLibur(e) {
     try {
         const { liburAPI } = await import('../../services/api.js');
 
+        // IF EDITING: Delete old entries first
+        if (window.currentEditingLiburIds && window.currentEditingLiburIds.length > 0) {
+            console.log('Editing: Deleting old entries...', window.currentEditingLiburIds);
+            const deletePromises = window.currentEditingLiburIds.map(id => liburAPI.delete(id));
+            await Promise.all(deletePromises);
+            window.currentEditingLiburIds = null; // Reset immediately
+        }
+
         // Save entries to database
         const savedEntries = [];
 
@@ -399,25 +424,9 @@ export async function saveNewLibur(e) {
             }
         }
 
-        // Update local state - group by dosenId
-        const existingIndex = APP_DATA.libur.findIndex(l => l.dosenId === dosenId);
-
-        if (existingIndex >= 0) {
-            // Merge with existing
-            const existingDates = APP_DATA.libur[existingIndex].dates || [];
-            const existingTimes = APP_DATA.libur[existingIndex].times || [];
-            APP_DATA.libur[existingIndex].dates = [...new Set([...existingDates, ...dates])];
-            APP_DATA.libur[existingIndex].times = [...new Set([...existingTimes, ...times])];
-            APP_DATA.libur[existingIndex].reason = reason;
-        } else {
-            // Create new grouped entry
-            APP_DATA.libur.push({
-                dosenId: dosenId,
-                dates: dates,
-                times: times,
-                reason: reason
-            });
-        }
+        // Update local state - Fetch fresh data from server to ensure accuracy
+        // and using store logic for grouping
+        await loadLiburFromAPI();
 
         if (appState.currentView === 'libur') {
             document.getElementById('main-content').innerHTML = views.libur();
@@ -432,7 +441,16 @@ export async function saveNewLibur(e) {
     }
 }
 
-export function toggleAddDosenModal(show) {
+// Helper for Edit Dosen
+window.editDosen = (nik) => {
+    const faculty = appState.currentDosenTab.toUpperCase();
+    const list = APP_DATA.facultyData[faculty] || [];
+    const dosen = list.find(d => d.nik === nik);
+    if (!dosen) return;
+    toggleAddDosenModal(true, dosen);
+};
+
+export function toggleAddDosenModal(show, editData = null) {
     const modalId = 'addDosenModal';
     let modal = document.getElementById(modalId);
 
@@ -444,65 +462,60 @@ export function toggleAddDosenModal(show) {
         modalContainer.id = modalId;
         modalContainer.className = 'modal-overlay';
 
+        const isEdit = !!editData;
+        const title = isEdit ? `✏️ Edit Dosen ${editData.nama}` : `➕ Tambah Dosen ${currentFaculty}`;
+        const subtitle = isEdit ? 'Perbarui data dosen dan preferensi jadwal.' : `Tambahkan dosen baru ke fakultas ${currentFaculty}`;
+
         const validProdis = {
-            'FIK': [
-                'S1 Informatika', 'S1 Sistem Informasi', 'S1 Teknologi Informasi', 'S1 Teknik Komputer',
-                'D3 Teknik Informatika', 'D3 Manajemen Informatika',
-                'S2 Informatika', 'S2 PJJ Informatika', 'S3 Informatika'
-            ],
-            'FES': [
-                'S1 Ilmu Komunikasi', 'S1 Ekonomi', 'S1 Akuntansi', 'S1 Hubungan Internasional',
-                'S1 Ilmu Pemerintahan', 'S1 Kewirausahaan'
-            ],
-            'FST': [
-                'S1 Arsitektur', 'S1 Perencanaan Wilayah Kota', 'S1 Geografi'
-            ]
+            'FIK': ['S1 Informatika', 'S1 Sistem Informasi', 'S1 Teknologi Informasi', 'S1 Teknik Komputer', 'D3 Teknik Informatika', 'D3 Manajemen Informatika', 'S2 Informatika', 'S2 PJJ Informatika', 'S3 Informatika'],
+            'FES': ['S1 Ilmu Komunikasi', 'S1 Ekonomi', 'S1 Akuntansi', 'S1 Hubungan Internasional', 'S1 Ilmu Pemerintahan', 'S1 Kewirausahaan'],
+            'FST': ['S1 Arsitektur', 'S1 Perencanaan Wilayah Kota', 'S1 Geografi']
         };
 
-        // Gabungkan semua prodi untuk fallback jika fakultas tidak dikenal
         const allProdis = [...validProdis.FIK, ...validProdis.FES, ...validProdis.FST].sort();
+        let targetProdis = validProdis[currentFaculty] || allProdis;
+        const prodiOptions = targetProdis.map(p => `<option value="${p}" ${editData && editData.prodi === p ? 'selected' : ''}>${p}</option>`).join('');
 
-        // Filter sesuai fakultas aktif
-        let targetProdis = validProdis[currentFaculty];
-        if (!targetProdis || targetProdis.length === 0) {
-            console.warn(`[Modal] Fakultas '${currentFaculty}' tidak ditemukan di validProdis. Menggunakan semua prodi.`);
-            targetProdis = allProdis;
-        }
+        const tabsHtml = !isEdit ? `
+        <div style="margin-bottom:1.5rem;">
+            <div style="display:flex; gap:10px; background:rgba(0,0,0,0.03); padding:4px; border-radius:12px;">
+                <button type="button" class="tab-btn active" onclick="window.switchDosenInputMode('csv')" data-mode="csv" style="flex:1; padding:10px; border:none; background:white; border-radius:10px; cursor:pointer; font-weight:700;">Import CSV</button>
+                <button type="button" class="tab-btn" onclick="window.switchDosenInputMode('manual')" data-mode="manual" style="flex:1; padding:10px; border:none; background:transparent; border-radius:10px; cursor:pointer; font-weight:700;">Input Manual</button>
+            </div>
+        </div>` : '';
 
-        const prodiOptions = targetProdis.map(p => `<option value="${p}">${p}</option>`).join('');
+        const csvSection = !isEdit ? `
+        <div id="csvInputSection">
+            <div style="text-align:center; padding:2rem; background:rgba(0,0,0,0.02); border-radius:12px; border:2px dashed var(--border);">
+                <div style="font-size:3rem; margin-bottom:1rem;">📄</div>
+                        <p style="margin-bottom:1rem; font-weight:600;">Upload file CSV dengan format:</p>
+                        <code style="display:block; background:white; padding:10px; border-radius:8px; margin-bottom:1rem; font-size:0.85rem;">No,Nama,NIK,Prodi,Fakultas,Pref(L/P)</code>
+                        <button type="button" onclick="document.getElementById('csvDosenInput').click()" class="btn-primary">Pilih File CSV</button>
+                <input type="file" id="csvDosenInput" accept=".csv" style="display:none;" onchange="window.handleDosenCSVUpload(event)">
+            </div>
+        </div>` : '';
+
+        // Pref Value
+        const pref = editData?.pref_gender || '';
 
         modalContainer.innerHTML = `
             <div class="modal-content" style="max-width:600px;">
-                <h2>➕ Tambah Dosen ${currentFaculty}</h2>
-                <p class="subtitle" style="margin-bottom:1.5rem;">Tambahkan dosen baru ke fakultas ${currentFaculty}</p>
+                <h2>${title}</h2>
+                <p class="subtitle" style="margin-bottom:1.5rem;">${subtitle}</p>
                 
-                <div style="margin-bottom:1.5rem;">
-                    <div style="display:flex; gap:10px; background:rgba(0,0,0,0.03); padding:4px; border-radius:12px;">
-                        <button type="button" class="tab-btn active" onclick="window.switchDosenInputMode('csv')" data-mode="csv" style="flex:1; padding:10px; border:none; background:white; border-radius:10px; cursor:pointer; font-weight:700;">Import CSV</button>
-                        <button type="button" class="tab-btn" onclick="window.switchDosenInputMode('manual')" data-mode="manual" style="flex:1; padding:10px; border:none; background:transparent; border-radius:10px; cursor:pointer; font-weight:700;">Input Manual</button>
-                    </div>
-                </div>
+                ${tabsHtml}
+                ${csvSection}
 
-                <div id="csvInputSection">
-                    <div style="text-align:center; padding:2rem; background:rgba(0,0,0,0.02); border-radius:12px; border:2px dashed var(--border);">
-                        <div style="font-size:3rem; margin-bottom:1rem;">📄</div>
-                        <p style="margin-bottom:1rem; font-weight:600;">Upload file CSV dengan format:</p>
-                        <code style="display:block; background:white; padding:10px; border-radius:8px; margin-bottom:1rem; font-size:0.85rem;">No,Nama,NIK,Prodi,Fakultas</code>
-                        <button type="button" onclick="document.getElementById('csvDosenInput').click()" class="btn-primary">Pilih File CSV</button>
-                        <input type="file" id="csvDosenInput" accept=".csv" style="display:none;" onchange="window.handleDosenCSVUpload(event)">
-                    </div>
-                </div>
-
-                <div id="manualInputSection" style="display:none;">
-                    <form onsubmit="window.saveNewDosen(event)">
+                <div id="manualInputSection" style="${!isEdit ? 'display:none;' : 'display:block;'}">
+                    <form onsubmit="window.saveNewDosen(event, ${isEdit})">
                         <input type="hidden" name="fakultas" value="${currentFaculty}">
                         <div class="form-group">
                             <label>NIK</label>
-                            <input type="text" name="nik" class="form-input" required placeholder="Contoh: 12345678">
+                            <input type="text" name="nik" class="form-input" required value="${editData?.nik || ''}" ${isEdit ? 'readonly style="background:#f5f5f5;"' : 'placeholder="Contoh: 12345678"'}>
                         </div>
                         <div class="form-group">
                             <label>Nama Lengkap</label>
-                            <input type="text" name="nama" class="form-input" required placeholder="Contoh: Dr. John Doe, M.Kom">
+                            <input type="text" name="nama" class="form-input" required value="${editData?.nama || ''}" placeholder="Contoh: Dr. John Doe, M.Kom">
                         </div>
                         <div class="form-group">
                             <label>Program Studi</label>
@@ -511,9 +524,18 @@ export function toggleAddDosenModal(show) {
                                 ${prodiOptions}
                             </select>
                         </div>
+                        <div class="form-group" style="background:#f0f9ff; padding:12px; border-radius:8px; border:1px solid #bae7ff;">
+                            <label style="color:#0050b3; font-weight:700;">Preferensi Mahasiswa (Gender Constraint)</label>
+                            <p style="font-size:0.8rem; color:#595959; margin-bottom:8px;">Batasi dosen ini hanya menguji mahasiswa dengan gender tertentu.</p>
+                            <select name="pref_gender" class="form-input">
+                                <option value="" ${pref === '' ? 'selected' : ''}>Semua Gender (Bebas)</option>
+                                <option value="L" ${pref === 'L' ? 'selected' : ''}>Hanya Mahasiswa Laki-laki</option>
+                                <option value="P" ${pref === 'P' ? 'selected' : ''}>Hanya Mahasiswa Perempuan</option>
+                            </select>
+                        </div>
                         <div class="modal-footer">
                             <button type="button" class="btn-secondary" onclick="window.toggleAddDosenModal(false)">Batal</button>
-                            <button type="submit" class="btn-primary">Simpan Dosen</button>
+                            <button type="submit" class="btn-primary">${isEdit ? 'Simpan Perubahan' : 'Simpan Dosen'}</button>
                         </div>
                     </form>
                 </div>
@@ -555,31 +577,46 @@ export function switchDosenInputMode(mode) {
     }
 }
 
-export async function saveNewDosen(e) {
+export async function saveNewDosen(e, isEdit = false) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const fakultas = formData.get('fakultas');
     const nik = formData.get('nik').trim();
     const nama = formData.get('nama').trim();
     const prodi = formData.get('prodi').trim();
-
-    if (APP_DATA.facultyData[fakultas]?.some(d => d.nik === nik)) {
-        showToast('NIK sudah terdaftar di fakultas ini!', 'warning');
-        return;
-    }
+    const pref_gender = formData.get('pref_gender');
 
     try {
         const { dosenAPI } = await import('../../services/api.js');
-        const response = await dosenAPI.bulkInsert([{ nik, nama, prodi, fakultas }]);
+        let response;
+
+        if (isEdit) {
+            response = await dosenAPI.update(nik, { nama, prodi, fakultas, pref_gender });
+        } else {
+            // Check duplicate NIK only for create
+            if (APP_DATA.facultyData[fakultas]?.some(d => d.nik === nik)) {
+                showToast('NIK sudah terdaftar di fakultas ini!', 'warning');
+                return;
+            }
+            // Note: bulkInsert now supports pref_gender
+            response = await dosenAPI.bulkInsert([{ nik, nama, prodi, fakultas, pref_gender }]);
+        }
 
         if (response.success) {
-            const newDosen = {
-                nik, nama, prodi, fakultas,
-                exclude: false
-            };
-
+            // Update Local Data
             if (!APP_DATA.facultyData[fakultas]) APP_DATA.facultyData[fakultas] = [];
-            APP_DATA.facultyData[fakultas].push(newDosen);
+
+            if (isEdit) {
+                const idx = APP_DATA.facultyData[fakultas].findIndex(d => d.nik === nik);
+                if (idx !== -1) {
+                    APP_DATA.facultyData[fakultas][idx] = {
+                        ...APP_DATA.facultyData[fakultas][idx],
+                        nama, prodi, pref_gender: pref_gender || null
+                    };
+                }
+            } else {
+                APP_DATA.facultyData[fakultas].push({ nik, nama, prodi, fakultas, exclude: false, pref_gender: null });
+            }
 
             if (appState.currentView === 'dosen') document.getElementById('main-content').innerHTML = views.dosen();
             toggleAddDosenModal(false);
@@ -609,13 +646,15 @@ export function handleDosenCSVUpload(e) {
             const fields = line.split(',').map(f => f.trim().replace(/^"|"$/g, ''));
             if (fields.length < 4) continue;
             const [no, nama, nik, prodi, fakultas] = fields;
-            const cleanNik = nik.replace(/^NIK\s+/, '').trim();
+            const cleanNik = String(nik).replace(/^NIK\s+/, '').trim();
+            const pref = fields[5] ? fields[5].trim().toUpperCase() : null;
 
             dataToUpload.push({
                 nik: cleanNik,
                 nama: nama.trim(),
                 prodi: prodi.trim(),
-                fakultas: fakultas ? fakultas.toUpperCase() : currentFaculty
+                fakultas: fakultas ? fakultas.toUpperCase() : currentFaculty,
+                pref_gender: pref === 'L' || pref === 'P' ? pref : null
             });
         }
 
@@ -887,3 +926,337 @@ export async function deleteMasterDosen(nik) {
         showToast('Gagal menghapus data master: ' + error.message, 'error');
     }
 }
+
+/**
+ * Manual Schedule Modal
+ * Allows user to manually assign a student to a specific slot with custom examiners
+ */
+export function toggleManualScheduleModal(show, date = null, time = null, room = null) {
+    const modalId = 'manualScheduleModal';
+    let modal = document.getElementById(modalId);
+
+    if (!show) {
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        }
+        return;
+    }
+
+    if (modal) modal.remove();
+    const modalContainer = document.createElement('div');
+    modalContainer.id = modalId;
+    modalContainer.className = 'modal-overlay';
+
+    // Get unscheduled students
+    const scheduledNims = new Set(APP_DATA.slots.map(s => s.mahasiswa_nim).filter(Boolean));
+    const unscheduledStudents = APP_DATA.mahasiswa.filter(m => !scheduledNims.has(m.nim));
+
+    if (unscheduledStudents.length === 0) {
+        showToast('Semua mahasiswa sudah terjadwal!', 'info');
+        return;
+    }
+
+    // Sort students alphabetically by name
+    unscheduledStudents.sort((a, b) => a.nama.localeCompare(b.nama));
+
+    // Get all active dosen
+    const allDosen = getAllDosen();
+
+    const studentOptions = unscheduledStudents.map(m =>
+        `<option value="${m.nim}" data-prodi="${m.prodi}" data-pembimbing="${m.pembimbing || ''}">${m.nama} (${m.prodi})</option>`
+    ).join('');
+
+    modalContainer.innerHTML = `
+        <div class="modal-content" style="max-width:700px;">
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                <h2 style="margin-bottom:0.5rem;">📌 Jadwalkan Manual</h2>
+                <p class="subtitle">Pilih mahasiswa dan dosen penguji untuk slot <strong>${date} - ${time} - ${room}</strong></p>
+            </div>
+
+            <form onsubmit="window.submitManualSchedule(event, '${date}', '${time}', '${room}')">
+                <div class="form-group">
+                    <label style="font-weight:700;">1️⃣ Pilih Mahasiswa</label>
+                    <select name="mahasiswaNim" id="manualMahasiswaSelect" class="form-input" required onchange="window.updateManualDosenOptions()">
+                        <option value="">-- Pilih Mahasiswa --</option>
+                        ${studentOptions}
+                    </select>
+                    <small style="color:var(--text-muted); display:block; margin-top:5px;">
+                        Hanya mahasiswa yang belum terjadwal yang ditampilkan.
+                    </small>
+                </div>
+
+                <div id="dosenSelectionSection" style="display:none;">
+                    <div class="form-group">
+                        <label style="font-weight:700;">2️⃣ Pilih Penguji 1</label>
+                        <select name="penguji1" id="manualPenguji1Select" class="form-input" required>
+                            <option value="">-- Pilih Penguji 1 --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-weight:700;">3️⃣ Pilih Penguji 2</label>
+                        <select name="penguji2" id="manualPenguji2Select" class="form-input" required>
+                            <option value="">-- Pilih Penguji 2 --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-weight:700;">4️⃣ Dosen Pembimbing</label>
+                        <input type="text" id="manualPembimbingInput" class="form-input" readonly style="background:#f5f5f5; font-weight:600;">
+                        <input type="hidden" name="pembimbing" id="manualPembimbingHidden">
+                        <small style="color:var(--text-muted); display:block; margin-top:5px;">
+                            Pembimbing otomatis terisi dari data mahasiswa.
+                        </small>
+                    </div>
+
+                    <div style="background:#fff3cd; border:1px solid #ffc107; border-radius:12px; padding:12px; margin-top:1rem;">
+                        <p style="font-size:0.85rem; color:#856404; margin:0; line-height:1.6;">
+                            <b>⚠️ Validasi Otomatis:</b><br>
+                            • Sistem akan cek ketersediaan semua dosen<br>
+                            • Penguji harus dari prodi yang sama dengan mahasiswa<br>
+                            • Dosen tidak boleh bentrok dengan jadwal lain<br>
+                            • Notifikasi error akan muncul jika ada yang tidak valid
+                        </p>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="margin-top:2rem; gap:12px;">
+                    <button type="button" class="btn-secondary" onclick="window.toggleManualScheduleModal(false)" style="flex:1;">Batal</button>
+                    <button type="submit" class="btn-primary" style="flex:2; font-weight:700;">✅ Jadwalkan Sekarang</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modalContainer);
+    setTimeout(() => modalContainer.classList.add('active'), 10);
+}
+
+export function updateManualDosenOptions() {
+    const mahasiswaSelect = document.getElementById('manualMahasiswaSelect');
+    const dosenSection = document.getElementById('dosenSelectionSection');
+    const penguji1Select = document.getElementById('manualPenguji1Select');
+    const penguji2Select = document.getElementById('manualPenguji2Select');
+    const pembimbingInput = document.getElementById('manualPembimbingInput');
+    const pembimbingHidden = document.getElementById('manualPembimbingHidden');
+
+    const selectedNim = mahasiswaSelect.value;
+    if (!selectedNim) {
+        dosenSection.style.display = 'none';
+        return;
+    }
+
+    const selectedOption = mahasiswaSelect.options[mahasiswaSelect.selectedIndex];
+    const prodi = selectedOption.dataset.prodi;
+    const pembimbing = selectedOption.dataset.pembimbing;
+
+    // Show dosen section
+    dosenSection.style.display = 'block';
+
+    // Set pembimbing
+    pembimbingInput.value = pembimbing || '(Belum ada pembimbing)';
+    pembimbingHidden.value = pembimbing || '';
+
+    // Calculate workload for each dosen from current slots
+    const workloadCounts = {};
+    APP_DATA.slots.forEach(slot => {
+        if (slot.examiners && Array.isArray(slot.examiners)) {
+            slot.examiners.forEach(examinerName => {
+                workloadCounts[examinerName] = (workloadCounts[examinerName] || 0) + 1;
+            });
+        }
+    });
+
+    // Filter dosen by prodi (STRICT RULE: same prodi only)
+    const allDosen = getAllDosen(true);
+    const filteredDosen = allDosen.filter(d => {
+        const dosenProdi = d.prodi?.toLowerCase().trim();
+        const studentProdi = prodi?.toLowerCase().trim();
+        return dosenProdi === studentProdi;
+    });
+
+    // Exclude pembimbing and add workload info
+    const dosenWithWorkload = filteredDosen
+        .filter(d => d.nama !== pembimbing)
+        .map(d => ({
+            nama: d.nama,
+            workload: workloadCounts[d.nama] || 0
+        }));
+
+    // Sort by workload (ascending - lightest load first)
+    dosenWithWorkload.sort((a, b) => a.workload - b.workload);
+
+    // Find minimum workload for highlighting
+    const minWorkload = dosenWithWorkload.length > 0
+        ? Math.min(...dosenWithWorkload.map(d => d.workload))
+        : 0;
+
+    // Generate options with workload display
+    const dosenOptions = dosenWithWorkload
+        .map(d => {
+            const isLightest = d.workload === minWorkload;
+            const badge = isLightest ? '⭐' : '';
+            const workloadText = d.workload === 0
+                ? 'Belum ada beban'
+                : `Beban: ${d.workload} slot`;
+
+            return `<option value="${d.nama}">${badge} ${d.nama} (${workloadText})</option>`;
+        })
+        .join('');
+
+    penguji1Select.innerHTML = `<option value="">-- Pilih Penguji 1 --</option>${dosenOptions}`;
+    penguji2Select.innerHTML = `<option value="">-- Pilih Penguji 2 --</option>${dosenOptions}`;
+
+    // Add helper text below dropdowns
+    const helperText = dosenWithWorkload.length > 0
+        ? `<small style="color:var(--success); display:block; margin-top:5px;">⭐ Dosen dengan beban paling ringan ditandai bintang dan muncul di atas untuk distribusi merata</small>`
+        : '';
+
+    // Insert helper text if not exists
+    if (!document.getElementById('workloadHelperText')) {
+        const helperDiv = document.createElement('div');
+        helperDiv.id = 'workloadHelperText';
+        helperDiv.innerHTML = helperText;
+        penguji2Select.parentElement.appendChild(helperDiv);
+    }
+}
+
+export async function submitManualSchedule(e, date, time, room) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    const mahasiswaNim = formData.get('mahasiswaNim');
+    const penguji1 = formData.get('penguji1');
+    const penguji2 = formData.get('penguji2');
+    const pembimbing = formData.get('pembimbing');
+
+    // Client-side validation
+    if (!mahasiswaNim || !penguji1 || !penguji2 || !pembimbing) {
+        showToast('Semua field harus diisi!', 'error');
+        return;
+    }
+
+    if (penguji1 === penguji2) {
+        showToast('Penguji 1 dan Penguji 2 harus berbeda!', 'error');
+        return;
+    }
+
+    if (penguji1 === pembimbing || penguji2 === pembimbing) {
+        showToast('Penguji tidak boleh sama dengan pembimbing!', 'error');
+        return;
+    }
+
+    try {
+        showToast('Memproses penjadwalan manual...', 'info');
+
+        const { scheduleAPI } = await import('../../services/api.js');
+        const response = await scheduleAPI.createManual({
+            mahasiswaNim,
+            penguji1,
+            penguji2,
+            pembimbing,
+            date,
+            time,
+            room
+        });
+
+        if (response.success) {
+            // Add to local state
+            APP_DATA.slots.push(response.slot);
+
+            // Refresh view
+            if (appState.currentView === 'home') {
+                const { HomeView } = await import('../pages/Home.js');
+                document.getElementById('main-content').innerHTML = HomeView();
+            }
+
+            toggleManualScheduleModal(false);
+            showToast(response.message || 'Berhasil menjadwalkan mahasiswa!', 'success');
+        } else {
+            showToast(response.error || 'Gagal menjadwalkan', 'error');
+        }
+    } catch (error) {
+        console.error('Error manual schedule:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+// Global Edit Helper for Libur
+window.currentEditingLiburIds = null;
+
+window.editLiburGroup = (idsString) => {
+    if (!idsString) return;
+    const ids = idsString.split(',').map(Number);
+
+    // Cari data di store (APP_DATA.libur sudah dikelompokkan)
+    const group = APP_DATA.libur.find(g => g.ids.some(id => ids.includes(id)));
+    if (!group) return;
+
+    window.currentEditingLiburIds = ids;
+    toggleAddLiburModal(true);
+
+    // Wait for Modal DOM to be ready
+    setTimeout(() => {
+        const form = document.querySelector('#addLiburModal form');
+        if (!form) return;
+
+        // Set Title
+        const title = document.querySelector('#addLiburModal h2');
+        if (title) title.textContent = 'Edit Aturan Dosen';
+
+        // Set Dosen
+        const dosenSelect = form.querySelector('select[name="dosenId"]');
+        if (dosenSelect) dosenSelect.value = group.dosenId;
+
+        // Set Reason
+        const reasonInput = form.querySelector('input[name="reason"]');
+        if (reasonInput) reasonInput.value = group.reason;
+
+        // Reset previous selections
+        document.querySelectorAll('.date-toggle.active, .time-toggle.active').forEach(el => el.classList.remove('active'));
+        const dateInput = document.getElementById('specificDate');
+        if (dateInput) dateInput.value = '';
+
+        // Determine Type Logic
+        const typeSelect = form.querySelector('select[name="ruleType"]');
+
+        if (group.times.length > 0 && group.dates.length === 0) {
+            // Recurring Time (No specific date)
+            if (typeSelect) {
+                typeSelect.value = 'recurring';
+                window.handleRuleTypeChange('recurring');
+            }
+            // Select Times
+            group.times.forEach(t => {
+                const btn = document.querySelector(`.time-toggle[data-value="${t}"]`);
+                if (btn) btn.classList.add('active');
+            });
+
+        } else if (group.dates.length > 0) {
+            // Has Dates (either Date Only or Date + Time)
+            if (group.dates.length === 1) {
+                if (typeSelect) {
+                    typeSelect.value = 'date';
+                    window.handleRuleTypeChange('date');
+                }
+                if (dateInput) dateInput.value = group.dates[0];
+            } else {
+                if (typeSelect) {
+                    typeSelect.value = 'multi-date';
+                    window.handleRuleTypeChange('multi-date');
+                }
+                group.dates.forEach(d => {
+                    const btn = document.querySelector(`.date-toggle[data-value="${d}"]`);
+                    if (btn) btn.classList.add('active');
+                });
+            }
+
+            // Also select times if any (Multi-Date + Time scenario is possible too)
+            group.times.forEach(t => {
+                const btn = document.querySelector(`.time-toggle[data-value="${t}"]`);
+                if (btn) btn.classList.add('active');
+            });
+        }
+
+    }, 150);
+};

@@ -1,4 +1,5 @@
 import pool from '../config/database.js';
+import { createLog } from './logsController.js';
 
 // Get all slots with examiners
 export async function getAllSlots(req, res) {
@@ -78,6 +79,8 @@ export async function deleteAllSlots(req, res) {
             message: 'All slots deleted successfully',
             deletedCount: rowCount
         });
+
+        await createLog('DELETE ALL', 'Jadwal', `Menghapus SEMUA jadwal ujian (${rowCount} slot)`);
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error deleting slots:', error);
@@ -94,6 +97,15 @@ export async function deleteSlot(req, res) {
         const { id } = req.params;
         await client.query('BEGIN');
 
+        // Fetch info before delete for logging
+        let logInfo = `Slot ID ${id}`;
+        try {
+            const { rows: slotInfo } = await client.query('SELECT * FROM slots WHERE id = $1', [id]);
+            if (slotInfo.length > 0) {
+                logInfo = `${slotInfo[0].student} pada ${slotInfo[0].date} ${slotInfo[0].time}`;
+            }
+        } catch (e) { }
+
         // slot_examiners will be deleted automatically due to CASCADE
         const { rowCount } = await client.query('DELETE FROM slots WHERE id = $1', [id]);
 
@@ -105,6 +117,8 @@ export async function deleteSlot(req, res) {
         await client.query('COMMIT');
 
         res.json({ success: true, message: 'Slot deleted successfully' });
+
+        await createLog('DELETE', 'Jadwal Ujian', `Menghapus jadwal ujian: ${logInfo}`);
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error deleting slot:', error);

@@ -1,4 +1,5 @@
 import pool from '../config/database.js';
+import { createLog } from './logsController.js';
 
 // Get all mahasiswa
 export async function getAllMahasiswa(req, res) {
@@ -31,21 +32,23 @@ export async function getMahasiswaByNim(req, res) {
 // Create mahasiswa
 export async function createMahasiswa(req, res) {
     try {
-        const { nim, nama, prodi, pembimbing } = req.body;
+        const { nim, nama, prodi, pembimbing, gender } = req.body;
 
         if (!nim || !nama || !prodi) {
             return res.status(400).json({ success: false, error: 'NIM, nama, and prodi are required' });
         }
 
         const { rows } = await pool.query(
-            'INSERT INTO mahasiswa (nim, nama, prodi, pembimbing) VALUES ($1, $2, $3, $4) RETURNING *',
-            [nim, nama, prodi, pembimbing || null]
+            'INSERT INTO mahasiswa (nim, nama, prodi, pembimbing, gender) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [nim, nama, prodi, pembimbing || null, gender || null]
         );
 
         res.status(201).json({
             success: true,
             data: rows[0]
         });
+
+        await createLog('CREATE', 'Mahasiswa', `Menambah data mahasiswa ${req.body.nama} (${req.body.nim}) - Prodi: ${req.body.prodi}`);
     } catch (error) {
         if (error.code === '23505') { // Unique violation in Postgres
             return res.status(409).json({ success: false, error: 'NIM already exists' });
@@ -59,18 +62,20 @@ export async function createMahasiswa(req, res) {
 export async function updateMahasiswa(req, res) {
     try {
         const { nim } = req.params;
-        const { nama, prodi, pembimbing } = req.body;
+        const { nama, prodi, pembimbing, gender } = req.body;
 
         const { rowCount } = await pool.query(
-            'UPDATE mahasiswa SET nama = $1, prodi = $2, pembimbing = $3 WHERE nim = $4',
-            [nama, prodi, pembimbing || null, nim]
+            'UPDATE mahasiswa SET nama = $1, prodi = $2, pembimbing = $3, gender = $4, updated_at = CURRENT_TIMESTAMP WHERE nim = $5',
+            [nama, prodi, pembimbing || null, gender || null, nim]
         );
 
         if (rowCount === 0) {
             return res.status(404).json({ success: false, error: 'Mahasiswa not found' });
         }
 
-        res.json({ success: true, data: { nim, nama, prodi, pembimbing } });
+        res.json({ success: true, data: { nim, nama, prodi, pembimbing, gender } });
+
+        await createLog('UPDATE', 'Mahasiswa', `Update data mahasiswa ${nama} (${nim})`);
     } catch (error) {
         console.error('Error updating mahasiswa:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -98,6 +103,8 @@ export async function deleteMahasiswa(req, res) {
 
         await client.query('COMMIT');
         res.json({ success: true, message: 'Mahasiswa and associated schedule deleted successfully' });
+
+        await createLog('DELETE', 'Mahasiswa', `Menghapus data mahasiswa NIM ${nim}`);
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error deleting mahasiswa:', error);
@@ -121,6 +128,8 @@ export async function deleteAllMahasiswa(req, res) {
 
         await client.query('COMMIT');
         res.json({ success: true, message: `All mahasiswa (${rowCount}) and schedules deleted successfully` });
+
+        await createLog('DELETE ALL', 'Mahasiswa', `Membersihkan SEMUA data mahasiswa (${rowCount} data)`);
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error deleting all mahasiswa:', error);
@@ -245,11 +254,15 @@ export async function bulkCreateMahasiswa(req, res) {
 
             try {
                 await client.query(
-                    `INSERT INTO mahasiswa (nim, nama, prodi, pembimbing) 
-                     VALUES ($1, $2, $3, $4) 
-                     ON CONFLICT (nim) 
-                     DO UPDATE SET nama = EXCLUDED.nama, prodi = EXCLUDED.prodi, pembimbing = EXCLUDED.pembimbing`,
-                    [mhs.nim, mhs.nama, mhs.prodi, finalPembimbing]
+                    `INSERT INTO mahasiswa (nim, nama, prodi, pembimbing, gender) 
+                     VALUES ($1, $2, $3, $4, $5)
+                     ON CONFLICT (nim) DO UPDATE 
+                     SET nama = EXCLUDED.nama, 
+                         prodi = EXCLUDED.prodi, 
+                         pembimbing = EXCLUDED.pembimbing,
+                         gender = EXCLUDED.gender,
+                         updated_at = CURRENT_TIMESTAMP`,
+                    [mhs.nim, mhs.nama, mhs.prodi, finalPembimbing, mhs.gender || null]
                 );
                 insertedCount++;
             } catch (err) {
@@ -265,8 +278,11 @@ export async function bulkCreateMahasiswa(req, res) {
             message: `Processed ${insertedCount} students. Auto-corrected ${correctedCount} supervisor names.`,
             inserted: insertedCount,
             skipped: skippedCount,
+            skipped: skippedCount,
             corrected: correctedCount
         });
+
+        await createLog('IMPORT', 'Mahasiswa', `Bulk import ${insertedCount} data mahasiswa. Auto-correct pembimbing: ${correctedCount}.`);
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error bulk creating mahasiswa:', error);

@@ -38,6 +38,12 @@ export const MahasiswaView = () => {
         });
     }
 
+    // Calculate stats for current view
+    const scheduledCount = data.reduce((acc, m) => {
+        return acc + (APP_DATA.slots.some(s => s.student === m.nama) ? 1 : 0);
+    }, 0);
+    const unscheduledCount = data.length - scheduledCount;
+
     // 3. Prepare Table Rows
     const rows = sorted.map(m => {
         const sched = APP_DATA.slots.find(s => s.student === m.nama);
@@ -66,6 +72,7 @@ export const MahasiswaView = () => {
         return [
             `<div style="font-family:monospace; font-weight:600;">${m.nim}</div>`,
             `<strong>${m.nama}</strong>`,
+            `<div style="text-align:center;">${m.gender || '-'}</div>`,
             `<span class="badge" style="background:rgba(0,0,0,0.05); color:var(--text-main); font-weight:600;">${m.prodi}</span>`,
             pembimbingDisplay,
             sched
@@ -80,12 +87,13 @@ export const MahasiswaView = () => {
     });
 
     const headers = [
-        { label: 'NIM', key: 'nim', width: '15%' },
-        { label: 'Nama Mahasiswa', key: 'nama', width: '25%' },
-        { label: 'Program Studi', key: 'prodi', width: '20%' },
+        { label: 'NIM', key: 'nim', width: '12%' },
+        { label: 'Nama Mahasiswa', key: 'nama', width: '20%' },
+        { label: 'L/P', key: 'gender', width: '5%', align: 'center' },
+        { label: 'Program Studi', key: 'prodi', width: '15%' },
         { label: 'Pembimbing Utama', key: 'pembimbing', width: '20%' },
         { label: 'Status Jadwal', width: '15%', align: 'center' }, // Status is dynamic, hard to sort by column unless we process it first. keeping it unsortable for now or simple.
-        { label: 'Aksi', width: '5%', align: 'center' }
+        { label: 'Aksi', width: '13%', align: 'center' }
     ];
 
     return `
@@ -119,9 +127,11 @@ export const MahasiswaView = () => {
                         <span class="search-icon">🔍</span>
                         <input type="text" id="mainSearchInput" class="search-input" placeholder="Cari NIM atau Nama..." value="${searchTerm}" oninput="window.handleSearchInput(event)">
                     </div>
-                    <div class="badge badge-primary">Total: ${data.length}</div> 
-                    <!-- note: 'filtered' undefined in code block above? Ah, data IS the filtered result now. -->
-                </div>
+                    <div style="display:flex; gap:8px;">
+                        <div class="badge badge-primary">Total: ${data.length}</div>
+                        <div class="badge badge-success" title="Sudah Terjadwal">✅ ${scheduledCount}</div>
+                        <div class="badge badge-warning" title="Belum Terjadwal">⏳ ${unscheduledCount}</div>
+                    </div>
                 
                 <div style="display: flex; gap: 16px; align-items: center;">
                     <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; user-select: none; color: var(--text-secondary); font-weight: 500;">

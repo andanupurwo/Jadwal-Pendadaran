@@ -83,12 +83,21 @@ async function initializeDatabase() {
                 nim VARCHAR(50) UNIQUE NOT NULL,
                 nama VARCHAR(255) NOT NULL,
                 prodi VARCHAR(255) NOT NULL,
+                gender VARCHAR(10),
                 pembimbing VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
-        console.log('✅ Table mahasiswa created');
+
+        // Migration: Add gender column if not exists
+        try {
+            await client.query(`ALTER TABLE mahasiswa ADD COLUMN IF NOT EXISTS gender VARCHAR(10)`);
+        } catch (e) {
+            console.log('Migration: gender column already exists or error', e.message);
+        }
+
+        console.log('✅ Table mahasiswa created/updated');
 
         // Tabel: libur
         await client.query(`
@@ -156,6 +165,18 @@ async function initializeDatabase() {
             )
         `);
         console.log('✅ Table users created');
+
+        // Tabel: activity_logs
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS activity_logs (
+                id SERIAL PRIMARY KEY,
+                action_type VARCHAR(50) NOT NULL,
+                target VARCHAR(100) NOT NULL,
+                description TEXT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('✅ Table activity_logs created');
 
         // Seed Admin if not exists
         const { rowCount: userCount } = await client.query('SELECT 1 FROM users LIMIT 1');
