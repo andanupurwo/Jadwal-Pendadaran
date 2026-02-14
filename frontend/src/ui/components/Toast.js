@@ -8,7 +8,7 @@ const style = `
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 99999;
+    z-index: 999999;
     font-family: 'Inter', system-ui, sans-serif;
     display: flex;
     flex-direction: column;

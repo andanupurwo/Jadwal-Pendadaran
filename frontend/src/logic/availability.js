@@ -2,7 +2,7 @@
 // Checks if a lecturer is available at a specific date and time
 
 import { APP_DATA, DATES } from '../data/store.js';
-import { getAllDosen, normalizeName } from '../utils/helpers.js';
+import { getAllDosen, compareNames } from '../utils/helpers.js';
 
 /**
  * Check if a lecturer is available at a specific date and time
@@ -15,10 +15,9 @@ import { getAllDosen, normalizeName } from '../utils/helpers.js';
  */
 export function isDosenAvailable(namaDosen, date, time, excludeSlotStudent = null, ignoreGlobalExclude = false) {
     const allDosen = getAllDosen();
-    const searchNameNorm = normalizeName(namaDosen);
 
     // Cari data dosen
-    const dosenData = allDosen.find(d => normalizeName(d.nama) === searchNameNorm);
+    const dosenData = allDosen.find(d => compareNames(d.nama, namaDosen));
 
     if (!dosenData) {
         console.warn(`[Availability] Data dosen tidak ditemukan untuk nama: ${namaDosen}`);
@@ -33,7 +32,7 @@ export function isDosenAvailable(namaDosen, date, time, excludeSlotStudent = nul
     const isLibur = APP_DATA.libur.some(l => {
         // Cek ID (NIK) jika ada data dosen, atau cek nama langsung
         const matchId = (dosenData && l.dosenId && l.dosenId === dosenData.nik);
-        const matchNama = normalizeName(l.nama || "") === searchNameNorm;
+        const matchNama = compareNames(l.nama || "", namaDosen);
 
         if (!matchId && !matchNama) return false;
         return l.dates && l.dates.includes(date);
@@ -47,7 +46,7 @@ export function isDosenAvailable(namaDosen, date, time, excludeSlotStudent = nul
         if (slot.date !== date || slot.time !== time) return false;
 
         // Cek apakah dia jadi P1, P2, atau Pembimbing di slot tersebut
-        return slot.examiners && slot.examiners.some(ex => normalizeName(ex) === searchNameNorm);
+        return slot.examiners && slot.examiners.some(ex => compareNames(ex, namaDosen));
     });
 
     return !busy;

@@ -1,6 +1,7 @@
 import { APP_DATA, appState } from '../../data/store.js';
 import { filterData, sortData } from '../../utils/helpers.js';
 import { renderTable } from '../components/Common.js';
+import { PRODI_SHORTNAMES } from '../../utils/constants.js';
 
 export const MahasiswaView = () => {
     const searchTerm = appState.searchTerm;
@@ -38,6 +39,12 @@ export const MahasiswaView = () => {
         });
     }
 
+    // Calculate stats for current view
+    const scheduledCount = data.reduce((acc, m) => {
+        return acc + (APP_DATA.slots.some(s => s.student === m.nama) ? 1 : 0);
+    }, 0);
+    const unscheduledCount = data.length - scheduledCount;
+
     // 3. Prepare Table Rows
     const rows = sorted.map(m => {
         const sched = APP_DATA.slots.find(s => s.student === m.nama);
@@ -63,11 +70,34 @@ export const MahasiswaView = () => {
             `;
         }
 
+        // Badge for pre-assigned status
+        const hasPreAssigned = m.penguji_1 || m.penguji_2;
+        let pengujiStatus = '';
+        if (m.penguji_1 && m.penguji_2) {
+            pengujiStatus = '<div style="display:flex; gap:4px; flex-wrap:wrap;"><span class="badge" style="background:var(--success); color:white; font-size:0.65rem; padding:2px 6px;">✓ Penguji Lengkap</span></div>';
+        } else if (m.penguji_1 || m.penguji_2) {
+            pengujiStatus = '<div style="display:flex; gap:4px; flex-wrap:wrap;"><span class="badge" style="background:var(--warning); color:white; font-size:0.65rem; padding:2px 6px;">⚡ Hybrid</span></div>';
+        } else {
+            pengujiStatus = '<span style="color:var(--text-muted); font-size:0.7rem; font-style:italic;">Auto</span>';
+        }
+
+        let pengujiDisplay = '';
+        if (m.penguji_1 && m.penguji_2) {
+            pengujiDisplay = `<div style="font-size:0.8rem; line-height:1.4;">P1: ${m.penguji_1}<br>P2: ${m.penguji_2}</div>`;
+        } else if (m.penguji_1 || m.penguji_2) {
+            pengujiDisplay = `<div style="font-size:0.8rem;">P${m.penguji_1 ? '1' : '2'}: ${m.penguji_1 || m.penguji_2}<br><span style="color:var(--text-muted); font-style:italic; font-size:0.7rem;">P${m.penguji_1 ? '2' : '1'}: Auto</span></div>`;
+        } else {
+            pengujiDisplay = '<span style="color:var(--text-muted); font-size:0.7rem; font-style:italic;">Belum ditentukan</span>';
+        }
+
         return [
             `<div style="font-family:monospace; font-weight:600;">${m.nim}</div>`,
             `<strong>${m.nama}</strong>`,
-            `<span class="badge" style="background:rgba(0,0,0,0.05); color:var(--text-main); font-weight:600;">${m.prodi}</span>`,
+            `<div style="text-align:center;">${m.gender || '-'}</div>`,
+            `<span class="badge" style="background:rgba(0,0,0,0.05); color:var(--text-main); font-weight:600; cursor:help;" title="${m.prodi}">${PRODI_SHORTNAMES[m.prodi] || m.prodi}</span>`,
             pembimbingDisplay,
+            pengujiDisplay,
+            pengujiStatus,
             sched
                 ? `<div onclick="window.viewAndHighlightSchedule('${m.nama}')" class="badge-success" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
                         <span style="font-size:12px;">📅</span> ${sched.date} (${sched.time})
@@ -80,12 +110,15 @@ export const MahasiswaView = () => {
     });
 
     const headers = [
-        { label: 'NIM', key: 'nim', width: '15%' },
-        { label: 'Nama Mahasiswa', key: 'nama', width: '25%' },
-        { label: 'Program Studi', key: 'prodi', width: '20%' },
-        { label: 'Pembimbing Utama', key: 'pembimbing', width: '20%' },
-        { label: 'Status Jadwal', width: '15%', align: 'center' }, // Status is dynamic, hard to sort by column unless we process it first. keeping it unsortable for now or simple.
-        { label: 'Aksi', width: '5%', align: 'center' }
+        { label: 'NIM', key: 'nim', width: '10%' },
+        { label: 'Nama Mahasiswa', key: 'nama', width: '15%' },
+        { label: 'L/P', key: 'gender', width: '4%', align: 'center' },
+        { label: 'Program Studi', key: 'prodi', width: '12%' },
+        { label: 'Pembimbing Utama', key: 'pembimbing', width: '15%' },
+        { label: 'Penguji Pre-assigned', width: '15%' },
+        { label: 'Status', width: '8%', align: 'center' },
+        { label: 'Jadwal', width: '12%', align: 'center' },
+        { label: 'Aksi', width: '9%', align: 'center' }
     ];
 
     return `
@@ -105,7 +138,7 @@ export const MahasiswaView = () => {
                 
                 <select onchange="window.handleProdiFilterChange(event)" class="form-select" style="width: 200px;">
                     <option value="">Semua Prodi</option>
-                    ${prodis.map(p => `<option value="${p}" ${appState.selectedProdiFilter === p ? 'selected' : ''}>${p}</option>`).join('')}
+                    ${prodis.map(p => `<option value="${p}" ${appState.selectedProdiFilter === p ? 'selected' : ''}>${PRODI_SHORTNAMES[p] || p} - ${p}</option>`).join('')}
                 </select>
 
                 <select onchange="window.handleStatusFilterChange(event)" class="form-select" style="width: 180px;">
@@ -119,9 +152,11 @@ export const MahasiswaView = () => {
                         <span class="search-icon">🔍</span>
                         <input type="text" id="mainSearchInput" class="search-input" placeholder="Cari NIM atau Nama..." value="${searchTerm}" oninput="window.handleSearchInput(event)">
                     </div>
-                    <div class="badge badge-primary">Total: ${data.length}</div> 
-                    <!-- note: 'filtered' undefined in code block above? Ah, data IS the filtered result now. -->
-                </div>
+                    <div style="display:flex; gap:8px;">
+                        <div class="badge badge-primary">Total: ${data.length}</div>
+                        <div class="badge badge-success" title="Sudah Terjadwal">✅ ${scheduledCount}</div>
+                        <div class="badge badge-warning" title="Belum Terjadwal">⏳ ${unscheduledCount}</div>
+                    </div>
                 
                 <div style="display: flex; gap: 16px; align-items: center;">
                     <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; user-select: none; color: var(--text-secondary); font-weight: 500;">

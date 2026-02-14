@@ -117,7 +117,7 @@ export const HomeView = () => {
                                 <div class="room-slot ${slot ? 'slot-filled' : 'slot-empty'}" 
                                      ${slot ? `draggable="true" ondragstart="window.onDragStart(event, '${slot.student}', '${currentDate}', '${time}', '${room}')" onclick="window.viewSlotDetails('${currentDate}', '${time}', '${room}')"` : `draggable="false"`}
                                      ondragover="${isRoomDisabled ? '' : 'window.onDragOver(event)'}" ondrop="${isRoomDisabled ? '' : `window.onDrop(event, '${currentDate}', '${time}', '${room}')`}"
-                                     style="padding: 0.6rem; border-radius: 8px; min-height: 100px; background: ${slot ? '#ffffff' : (isRoomDisabled ? '#f9f9f9' : 'var(--card-bg)')}; border: 1px solid ${slot ? 'var(--border)' : (isRoomDisabled ? 'transparent' : 'transparent')}; ${isRoomDisabled ? 'background-image: repeating-linear-gradient(45deg, #f3f3f3, #f3f3f3 10px, #f9f9f9 10px, #f9f9f9 20px);' : ''} ${slot ? 'border-left: 4px solid var(--success);' : ''} transition: all 0.2s; cursor: ${slot ? 'pointer' : (isRoomDisabled ? 'not-allowed' : 'default')}; position: relative;">
+                                     style="padding: 0.6rem; border-radius: 8px; min-height: 100px; background: ${slot ? '#ffffff' : (isRoomDisabled ? '#f9f9f9' : 'var(--card-bg)')}; border: 1px solid ${slot ? 'var(--border)' : (isRoomDisabled ? 'transparent' : 'transparent')}; ${isRoomDisabled ? 'background-image: repeating-linear-gradient(45deg, #f3f3f3, #f3f3f3 10px, #f9f9f9 10px, #f9f9f9 20px);' : ''} ${slot ? 'border-left: 4px solid var(--success);' : ''} transition: all 0.2s; cursor: ${slot ? 'pointer' : (isRoomDisabled ? 'not-allowed' : 'pointer')}; position: relative;">
                                     ${slot ? `
                                         <div style="display: flex; flex-direction: column; height: 100%;">
                                             <div style="position: absolute; top: 4px; right: 4px; display: flex; gap: 4px; z-index: 10;">
@@ -134,9 +134,9 @@ export const HomeView = () => {
                                             </div>
                                         </div>
                                     ` : (isRoomDisabled ? '' : `
-                                        <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border:2px dashed ${APP_DATA.clipboard ? 'var(--primary)' : 'var(--border)'}; border-radius:6px; color: ${APP_DATA.clipboard ? 'var(--primary)' : 'var(--text-muted)'};"
-                                             ${APP_DATA.clipboard ? `onclick="window.pasteSlotFromClipboard('${currentDate}', '${time}', '${room}')"` : ''}>
-                                             <span>${APP_DATA.clipboard ? '📋' : '+'}</span><span style="font-size:0.75rem;">${APP_DATA.clipboard ? 'Tempel' : 'Kosong'}</span>
+                                        <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border:2px dashed ${APP_DATA.clipboard ? 'var(--primary)' : 'var(--border)'}; border-radius:6px; color: ${APP_DATA.clipboard ? 'var(--primary)' : 'var(--text-muted)'}; cursor:pointer;"
+                                             ${APP_DATA.clipboard ? `onclick="window.pasteSlotFromClipboard('${currentDate}', '${time}', '${room}')"` : `onclick="window.toggleManualScheduleModal(true, '${currentDate}', '${time}', '${room}')"`}>
+                                             <span>${APP_DATA.clipboard ? '📋' : '+'}</span><span style="font-size:0.75rem;">${APP_DATA.clipboard ? 'Tempel' : 'Jadwalkan'}</span>
                                         </div>
                                     `)}
                                 </div>

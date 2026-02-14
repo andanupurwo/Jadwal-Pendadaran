@@ -44,6 +44,11 @@ export function sortData(data, column, direction = null) {
         let valA = a[column];
         let valB = b[column];
 
+        // Handle nulls/undefined always last (or first)
+        if (valA === valB) return 0;
+        if (valA === null || valA === undefined || valA === '') return 1; // Empty values at bottom
+        if (valB === null || valB === undefined || valB === '') return -1;
+
         // Handle boolean sorting for exclude (OFF/ON)
         if (column === 'exclude') {
             valA = valA ? 1 : 0;
@@ -97,12 +102,46 @@ export function filterData(data, term) {
 // Normalize name for matching (remove titles, extra spaces)
 export function normalizeName(name) {
     if (!name) return '';
-    return name
-        .toLowerCase()
+    // 1. Ambil nama depan sebelum gelar (koma)
+    let base = name.split(',')[0];
+    // 2. Hapus gelar depan umum
+    base = base.replace(/^(dr|drs|prof|apt|irk)\.?\s+/gi, '');
+    // 3. Bersihkan tanda baca dan spasi ganda
+    return base.toLowerCase()
+        .replace(/[.,]/g, ' ')
         .replace(/\s+/g, ' ')
-        .replace(/[.,]/g, '')
-        .replace(/\b(dr|drs|prof|s\.?si|s\.?kom|s\.?t|s\.?e|s\.?ip|s\.?sos|m\.?kom|m\.?t|m\.?eng|m\.?si|m\.?ak|m\.?ba|m\.?m|m\.?a|m\.?i\.kom|ph\.?d|ak|ca|ll\.?m)\b/gi, '')
         .trim();
+}
+
+/**
+ * Compare two names by matching minimum 2 words
+ * Handles variations like "Yusuf Amri Amrullah" vs "Yusuf Amri Amri Amrullah"
+ * Returns true if both names share at least 2 common words (after normalization)
+ */
+export function compareNames(name1, name2) {
+    if (!name1 || !name2) return false;
+    
+    // Normalize and split into words
+    const normalize = (n) => {
+        let base = n.split(',')[0]; // Take before comma (remove titles)
+        base = base.replace(/^(dr|drs|prof|apt|irk)\.?\s+/gi, ''); // Remove prefixes
+        return base.toLowerCase()
+            .replace(/[.,]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .split(' ')
+            .filter(w => w.length > 0); // Common words only
+    };
+    
+    const words1 = normalize(name1);
+    const words2 = normalize(name2);
+    
+    if (words1.length === 0 || words2.length === 0) return false;
+    
+    // Count common words
+    const commonWords = words1.filter(w => words2.includes(w));
+    
+    // At least 2 words must match
+    return commonWords.length >= 2;
 }
 
 // Calculate string similarity (Levenshtein distance-based)

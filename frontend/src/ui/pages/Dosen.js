@@ -1,6 +1,7 @@
 import { APP_DATA, appState } from '../../data/store.js';
 import { sortData, filterData } from '../../utils/helpers.js';
 import { renderTable, renderTabItem } from '../components/Common.js';
+import { PRODI_SHORTNAMES } from '../../utils/constants.js';
 
 export const DosenView = () => {
     const currentDosenTab = appState.currentDosenTab;
@@ -14,7 +15,7 @@ export const DosenView = () => {
 
         const rows = sorted.map(d => [
             d.nik,
-            `<div class="text-truncate" title="${d.nama}"><strong>${d.nama}</strong></div>`,
+            `<div class="text-truncate" title="Klik untuk lihat jadwal" style="cursor:pointer; color:var(--primary);" onclick="window.showLecturerSchedule('${d.nama.replace(/'/g, "\\'")}')"><strong>${d.nama}</strong> <span style="font-size:0.8rem;">📅</span></div>`,
             `<div style="text-align:center;"><span class="badge ${d.status === 'DOSEN' ? 'badge-primary' : 'badge-secondary'}" style="display:inline-block; min-width:60px;">${d.status}</span></div>`,
             `<div class="text-truncate">${d.kategori || '-'}</div>`,
             `<div style="font-family: monospace; font-size: 0.8rem; text-align:center;">${d.nidn || '-'}</div>`,
@@ -63,11 +64,17 @@ export const DosenView = () => {
 
         const rows = sorted.map(d => {
             const isIncluded = !d.exclude;
+            const prefLabel = d.pref_gender === 'L' ? '<span class="badge" style="background:#e6f7ff; color:#1890ff; border:1px solid #91d5ff;">L Only</span>'
+                : d.pref_gender === 'P' ? '<span class="badge" style="background:#fff0f6; color:#eb2f96; border:1px solid #ffadd2;">P Only</span>'
+                    : '<span style="color:#d9d9d9;">-</span>';
+
             return {
                 content: [
                     d.nik,
-                    `<div class="text-truncate" title="${d.nama}"><strong>${d.nama}</strong></div>`,
-                    d.prodi,
+                    `<div class="text-truncate" title="Klik untuk lihat jadwal" style="cursor:pointer; color:var(--primary);" onclick="window.showLecturerSchedule('${d.nama.replace(/'/g, "\\'")}')"><strong>${d.nama}</strong> <span style="font-size:0.8rem;">📅</span></div>`,
+                    `<span style="cursor:help;" title="${d.prodi}">${PRODI_SHORTNAMES[d.prodi] || d.prodi}</span>`,
+                    prefLabel,
+                    d.max_slots ? `<span style="font-weight:700; color:var(--success);">${d.max_slots} Slot</span>` : '<span style="color:#d9d9d9;">-</span>',
                     `${d.matchResult?.matched
                         ? `<span class="badge badge-success" style="background:#e6f9f1; color:#00a854; border:1px solid #b7eb8f;">✓ Valid</span>`
                         : `<span class="badge badge-danger" style="background:#fff1f0; color:#f5222d; border:1px solid #ffa39e;">Unmatched</span>`}`,
@@ -78,18 +85,23 @@ export const DosenView = () => {
                         </label>
                         <span style="font-size:0.75rem; font-weight:700; color:${isIncluded ? 'var(--success)' : 'var(--danger)'}">${isIncluded ? 'ON' : 'OFF'}</span>
                     </div>`,
-                    `<button type="button" onclick="window.deleteDosen('${faculty}', '${d.nik}')" class="btn-icon">🗑️</button>`
+                    `<div style="display:flex; justify-content:center; gap:8px;">
+                        <button type="button" onclick="window.editDosen('${d.nik}')" class="btn-icon" style="color:var(--primary); font-size:1.1rem;">✏️</button>
+                        <button type="button" onclick="window.deleteDosen('${faculty}', '${d.nik}')" class="btn-icon" style="color:var(--danger); font-size:1.1rem;">🗑️</button>
+                     </div>`
                 ],
                 className: isIncluded ? '' : 'excluded-row'
             };
         });
 
         const headers = [
-            { label: 'NIK', key: 'nik', width: '15%' },
-            { label: 'Nama Dosen', key: 'nama', width: '30%' },
-            { label: 'Prodi', key: 'prodi', width: '20%' },
-            { label: 'Status Data', key: 'isMatched', width: '12%', align: 'center' },
-            { label: 'Active', key: 'exclude', width: '10%', align: 'center' },
+            { label: 'NIK', key: 'nik', width: '12%' },
+            { label: 'Nama Dosen', key: 'nama', width: '25%' },
+            { label: 'Prodi', key: 'prodi', width: '15%' },
+            { label: 'Pref', key: 'pref_gender', width: '8%', align: 'center' },
+            { label: 'Quota', key: 'max_slots', width: '8%', align: 'center' },
+            { label: 'Status Data', key: 'isMatched', width: '10%', align: 'center' },
+            { label: 'Active', key: 'exclude', width: '9%', align: 'center' },
             { label: 'Aksi', align: 'center', width: '13%' }
         ];
 
@@ -99,7 +111,7 @@ export const DosenView = () => {
             <div class="controls-bar">
                 <select onchange="window.handleProdiFilterChange(event)" class="form-select" style="width: 250px;">
                     <option value="">Semua Prodi</option>
-                    ${prodis.map(p => `<option value="${p}" ${appState.selectedProdiFilter === p ? 'selected' : ''}>${p}</option>`).join('')}
+                    ${prodis.map(p => `<option value="${p}" ${appState.selectedProdiFilter === p ? 'selected' : ''}>${PRODI_SHORTNAMES[p] || p} - ${p}</option>`).join('')}
                 </select>
                 <select onchange="window.handleStatusFilterChange(event)" class="form-select" style="width: 170px;">
                     <option value="all">Semua Status</option>

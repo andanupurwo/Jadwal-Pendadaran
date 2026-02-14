@@ -94,27 +94,41 @@ export async function loadLiburFromAPI() {
     try {
         const response = await liburAPI.getAll();
         if (response.success) {
-            // Group libur entries by NIK
+            // Group libur entries by NIK AND Reason
             const grouped = {};
             response.data.forEach(entry => {
                 const nik = entry.nik;
                 if (!nik) return; // Skip entries without NIK
 
-                if (!grouped[nik]) {
-                    grouped[nik] = {
+                // Create unique key based on NIK, Reason, AND Type to separate distinct rules (e.g. Date-only vs Time-only)
+                const reasonKey = (entry.reason || '').trim();
+
+                // Determine TYPE
+                const isDateOnly = entry.date && !entry.time;
+                const isTimeOnly = !entry.date && entry.time;
+                const typeKey = isDateOnly ? 'DATE_ONLY' : (isTimeOnly ? 'TIME_ONLY' : 'DATE_TIME');
+
+                const key = `${nik}|${reasonKey}|${typeKey}`;
+
+                if (!grouped[key]) {
+                    grouped[key] = {
                         dosenId: nik,
                         dates: [],
                         times: [],
-                        reason: entry.reason || ''
+                        reason: entry.reason || '',
+                        ids: [] // Store IDs for accurate deletion
                     };
                 }
 
-                if (entry.date && !grouped[nik].dates.includes(entry.date)) {
-                    grouped[nik].dates.push(entry.date);
+                // Store the ID
+                if (entry.id) grouped[key].ids.push(entry.id);
+
+                if (entry.date && !grouped[key].dates.includes(entry.date)) {
+                    grouped[key].dates.push(entry.date);
                 }
 
-                if (entry.time && !grouped[nik].times.includes(entry.time)) {
-                    grouped[nik].times.push(entry.time);
+                if (entry.time && !grouped[key].times.includes(entry.time)) {
+                    grouped[key].times.push(entry.time);
                 }
             });
 

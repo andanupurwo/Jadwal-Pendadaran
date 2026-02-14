@@ -109,6 +109,24 @@ jadwal-pendadaran/
 
 ## 🎯 Features Preserved
 
+### ✅ Advanced Scheduling Engine Rules (V2)
+
+1. **Student-First Heuristics** ✅
+   - Sistem mendeteksi mahasiswa dengan pembimbing paling "sibuk" (berdasarkan data Libur).
+   - Mahasiswa dengan kendala tertinggi diproses di urutan pertama (Most Constrained Variable First).
+   - Sistem melakukan pencarian slot secara global (semua tanggal/jam/ruangan) untuk setiap mahasiswa.
+
+2. **Supervisor Protection Rule** ✅
+   - Seorang dosen **DIPROTEKSI** dari tugas menguji mahasiswa lain/prodi lain selama mahasiwa bimbingan mereka sendiri belum semuanya terjadwal.
+   - Hal ini menjamin ketersediaan jam terbatas dosen pembimbing utama tetap terjaga untuk anak didik mereka sendiri.
+
+3. **Smart Name Normalization** ✅
+   - Sistem secara cerdas mengabaikan gelar akademik, tanda baca, dan variasi penulisan nama saat mencocokkan ketersediaan dosen di tabel Libur dan Master Data.
+   - Mendukung pencocokan berbasis NIK yang 100% akurat.
+
+4. **Kesesuaian Gender** ✅
+   - Implementasi preferensi gender untuk tim penguji guna kenyamanan mahasiswa/dosen (Contoh: Mahasiswi diprioritaskan mendapat penguji wanita jika tersedia).
+
 ### ✅ All Business Logic Maintained
 
 1. **Sequential Greedy Search Algorithm** ✅

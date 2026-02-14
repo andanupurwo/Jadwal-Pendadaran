@@ -1,4 +1,4 @@
-import { settingsAPI, authAPI } from '../../services/api.js';
+import { settingsAPI, authAPI, logsAPI } from '../../services/api.js';
 import { ROOMS, DISABLED_ROOMS, TIMES, DATES, appState } from '../../data/store.js';
 import { showConfirm } from '../components/ConfirmationModal.js';
 import { LogicView } from './Logic.js';
@@ -30,6 +30,11 @@ export const SettingsView = () => {
                      onclick="window.switchSettingsTab('account')"
                      style="padding: 8px 24px; min-width: 120px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, color 0.2s; background: ${appState.settingsTab === 'account' ? 'var(--bg)' : 'transparent'}; box-shadow: ${appState.settingsTab === 'account' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};">
                     🔒 Akun
+                </div>
+                <div class="tab-item ${appState.settingsTab === 'logs' ? 'active' : ''}"
+                     onclick="window.switchSettingsTab('logs')"
+                     style="padding: 8px 24px; min-width: 120px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, color 0.2s; background: ${appState.settingsTab === 'logs' ? 'var(--bg)' : 'transparent'}; box-shadow: ${appState.settingsTab === 'logs' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};">
+                    📜 Log Aktivitas
                 </div>
              </div>
         </div>
@@ -91,6 +96,87 @@ export const SettingsView = () => {
                             Simpan Perubahan
                         </button>
                     </form>
+                </div>
+            </div>
+        `;
+    }
+
+    // Render Logs content
+    if (appState.settingsTab === 'logs') {
+        const mapAction = (type) => {
+            switch (type) {
+                case 'CREATE': return '<span class="badge" style="background:var(--success-bg); color:var(--success);">✨ Baru</span>';
+                case 'CREATE MANUAL': return '<span class="badge" style="background:var(--success-bg); color:var(--success);">✨ Manual</span>';
+                case 'DELETE': return '<span class="badge" style="background:var(--danger-bg); color:var(--danger);">🗑️ Hapus</span>';
+                case 'DELETE ALL': return '<span class="badge" style="background:var(--danger-bg); color:var(--danger);">🔥 Reset</span>';
+                case 'UPDATE': return '<span class="badge" style="background:var(--primary-bg); color:var(--primary);">📝 Edit</span>';
+                case 'GENERATE': return '<span class="badge" style="background:var(--warning-bg); color:var(--warning);">⚙️ Auto</span>';
+                case 'MOVE': return '<span class="badge" style="background:var(--info-bg); color:var(--info);">🚚 Pindah</span>';
+                case 'IMPORT': return '<span class="badge" style="background:var(--primary-bg); color:var(--primary);">📥 Import</span>';
+                default: return `<span class="badge" style="background:var(--secondary-bg); color:var(--text-secondary);">${type}</span>`;
+            }
+        };
+
+        setTimeout(async () => {
+            const container = document.getElementById('logs-container');
+            if (container) {
+                try {
+                    container.innerHTML = '<div style="padding: 2rem; text-align: center;">Loading logs...</div>';
+                    const res = await logsAPI.getAll();
+                    const logs = res.data || [];
+
+                    if (logs.length === 0) {
+                        container.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-muted);">Belum ada aktivitas tercatat.</div>';
+                        return;
+                    }
+
+                    container.innerHTML = `
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 180px;">Waktu</th>
+                                        <th style="width: 120px;">Aksi</th>
+                                        <th style="width: 150px;">Kategori</th>
+                                        <th>Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${logs.map(log => `
+                                        <tr>
+                                            <td style="color:var(--text-secondary); font-size:0.9rem;">
+                                                ${new Date(log.timestamp).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            </td>
+                                            <td>${mapAction(log.action_type)}</td>
+                                            <td><span style="font-weight:600; color:var(--text-secondary); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.5px;">${log.target}</span></td>
+                                            <td style="line-height:1.5;">${log.description}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } catch (error) {
+                    container.innerHTML = '<div style="padding: 1rem; color: var(--danger);">Gagal memuat log aktivitas.</div>';
+                }
+            }
+        }, 0);
+
+        return `
+            <div class="container">
+                <header class="page-header">
+                     <div class="header-info">
+                        <h1>Log Aktivitas</h1>
+                        <p class="subtitle">Riwayat tindakan yang dilakukan dalam sistem.</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn-secondary" onclick="window.clearLogs()">Bersihkan Log</button>
+                    </div>
+                </header>
+                ${renderTabs()}
+                
+                <div class="card">
+                    <div id="logs-container"></div>
                 </div>
             </div>
         `;
@@ -299,6 +385,17 @@ export const SettingsView = () => {
 window.switchSettingsTab = (tab) => {
     appState.settingsTab = tab;
     navigate('settings');
+};
+
+window.clearLogs = async () => {
+    if (!(await showConfirm('Hapus semua log aktivitas?'))) return;
+    try {
+        await logsAPI.clear();
+        showToast('Log aktivitas berhasil dibersihkan', 'success');
+        navigate('settings'); // Refresh
+    } catch (error) {
+        showToast('Gagal membersihkan log: ' + error.message, 'error');
+    }
 };
 
 // Global handlers

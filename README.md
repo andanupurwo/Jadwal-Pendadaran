@@ -16,14 +16,13 @@ jadwal-pendadaran/
 
 ## 🚀 Fitur Utama
 
-- **Penjadwalan Otomatis** - Algoritma Sequential Greedy Search untuk mengalokasikan slot ujian
-- **Manajemen Dosen** - Import dan kelola data dosen dari berbagai fakultas (FIK, FES, FST)
-- **Manajemen Mahasiswa** - Kelola data mahasiswa dan pembimbing
-- **Aturan Ketersediaan** - Atur jadwal libur dan ketidaktersediaan dosen
-- **Validasi Data** - Matching otomatis dengan master data SDM
-- **REST API** - Backend API yang scalable dan maintainable
-- **PostgreSQL Database** - Data persistence yang reliable
-- **Responsive UI** - Antarmuka modern dengan dark mode support
+- **Penjadwalan Otomatis (Advanced Engine)** - Algoritma Sequential Greedy dengan strategi Student-First (prioritas mahasiswa bimbingan tersulit).
+- **Proteksi Pembimbing** - Menjamin ketersediaan dosen pembimbing untuk mahasiswanya sendiri sebelum dijadikan penguji orang lain.
+- **Manajemen Dosen** - Import dan kelola data dosen dari berbagai fakultas (FIK, FES, FST).
+- **Manajemen Mahasiswa** - Kelola data mahasiswa dan pembimbing.
+- **Aturan Ketersediaan** - Atur jadwal libur dan ketidaktersediaan dosen dengan matching nama yang cerdas.
+- **Validasi Data** - Matching otomatis dengan master data SDM.
+- **Gender Constraint** - Dukungan preferensi gender untuk tim penguji.
 
 ## 🛠️ Tech Stack
 

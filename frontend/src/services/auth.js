@@ -2,9 +2,35 @@
 import { showConfirm } from '../ui/components/ConfirmationModal.js';
 import { authAPI } from './api.js';
 
+// Helper: Check JWT token expiry
+function isTokenExpired(token) {
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return true;
+
+        const payload = JSON.parse(atob(parts[1]));
+        if (!payload.exp) return false; // No expiry = valid
+        
+        const expiryTime = payload.exp * 1000; // Convert to milliseconds
+        return Date.now() > expiryTime;
+    } catch (err) {
+        console.error('Token parse error:', err);
+        return true; // If error, consider expired
+    }
+}
+
 export function isAuthenticated() {
     const token = localStorage.getItem('token');
-    return !!token;
+    
+    // Check if token exists and is not expired
+    if (!token) return false;
+    if (isTokenExpired(token)) {
+        // Token expired, remove it
+        logout();
+        return false;
+    }
+    
+    return true;
 }
 
 export async function login(username, password) {
@@ -13,6 +39,7 @@ export async function login(username, password) {
         if (response.success) {
             localStorage.setItem('token', response.token);
             localStorage.setItem('user', JSON.stringify(response.user));
+            localStorage.setItem('login_time', new Date().toISOString());
             return { success: true };
         }
         return { success: false, error: response.error };
@@ -25,6 +52,7 @@ export async function login(username, password) {
 export function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('login_time');
     // localStorage.removeItem('isAuthenticated'); // Cleanup old key if exists
 }
 

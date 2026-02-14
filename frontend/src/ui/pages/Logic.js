@@ -24,16 +24,16 @@ export const LogicView = () => `
                     <div style="background: white; border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
                         <ol style="margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 1rem;">
                             <li>
-                                <strong style="color: var(--text-main);">Iterasi Slot Waktu (Time-First)</strong>
-                                <div style="font-size: 0.9rem; margin-top: 4px;">Sistem mengunci <strong>Tanggal</strong> terlebih dahulu, kemudian menyisir setiap <strong>Sesi Jam</strong>, dan terakhir menyisir <strong>Ruangan</strong> yang tersedia.</div>
+                                <strong style="color: var(--text-main);">Prioritas Mahasiswa (Student-First)</strong>
+                                <div style="font-size: 0.9rem; margin-top: 4px;">Berbeda dengan sistem lama, sistem sekarang mengutamakan <strong>Mahasiswa</strong>. Mahasiswa dengan pembimbing yang paling sibuk (banyak Libur) akan dijadwalkan paling pertama untuk mengamankan slot sempit mereka.</div>
                             </li>
                             <li>
-                                <strong style="color: var(--text-main);">Pencocokan Mahasiswa</strong>
-                                <div style="font-size: 0.9rem; margin-top: 4px;">Sistem mengambil mahasiswa yang belum terjadwal (diurutkan berdasarkan NIM) dan mencoba memasukkannya ke slot tersebut.</div>
+                                <strong style="color: var(--text-main);">Pencarian Slot (Global Search)</strong>
+                                <div style="font-size: 0.9rem; margin-top: 4px;">Untuk setiap mahasiswa, sistem menyisir seluruh <strong>Tanggal, Jam, dan Ruangan</strong> secara mendalam sampai menemukan satu celah yang pas dengan syarat ketersediaan pembimbing dan penguji.</div>
                             </li>
                             <li>
-                                <strong style="color: var(--text-main);">Verifikasi Pembimbing (CRITICAL)</strong>
-                                <div style="font-size: 0.9rem; margin-top: 4px;">Sistem mengecek apakah <strong>Pembimbing Utama</strong> mahasiswa tersebut tersedia di jam & tanggal ini. Jika pembimbing sibuk/libur, slot dilewati.</div>
+                                <strong style="color: var(--text-main);">Verifikasi Pembimbing & Proteksi</strong>
+                                <div style="font-size: 0.9rem; margin-top: 4px;">Sistem mengecek ketersediaan <strong>Pembimbing Utama</strong>. Jika pembimbing sibuk, slot dilewati. Sistem juga memproteksi pembimbing agar tidak "kecurian" jam tugas untuk menguji orang lain sebelum bimbingan mereka sendiri aman.</div>
                             </li>
                             <li>
                                 <strong style="color: var(--text-main);">Pencarian Tim Penguji</strong>
@@ -55,6 +55,16 @@ export const LogicView = () => `
                     
                     <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
                         <!-- Constraint Item -->
+                         <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 4px solid var(--primary); border-radius: 8px; padding: 1rem;">
+                            <strong style="display: block; color: var(--text-main); margin-bottom: 4px; font-size: 0.9rem;">🛡️ Proteksi Pembimbing</strong>
+                            <span style="font-size: 0.85rem;">Seorang dosen dilarang menjadi penguji untuk orang lain selama bimbingan mereka sendiri masih ada yang belum terjadwal (mengamankan jam terbang sendiri).</span>
+                        </div>
+                        <!-- Constraint Item -->
+                         <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 4px solid var(--primary); border-radius: 8px; padding: 1rem;">
+                            <strong style="display: block; color: var(--text-main); margin-bottom: 4px; font-size: 0.9rem;">⚧️ Kesesuaian Gender (Opsional)</strong>
+                            <span style="font-size: 0.85rem;">Jika diatur di menu Dosen, sistem akan mencocokkan jenis kelamin mahasiswa dengan preferensi penguji (misal penguji wanita untuk mahasiswi).</span>
+                        </div>
+                        <!-- Constraint Item -->
                         <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 4px solid var(--danger); border-radius: 8px; padding: 1rem;">
                             <strong style="display: block; color: var(--text-main); margin-bottom: 4px; font-size: 0.9rem;">🚫 Anti-Bentrok Waktu</strong>
                             <span style="font-size: 0.85rem;">Dosen (baik Pembimbing maupun Penguji) tidak boleh memiliki jadwal lain di waktu yang persis sama.</span>
@@ -67,12 +77,12 @@ export const LogicView = () => `
                         <!-- Constraint Item -->
                         <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 4px solid var(--warning); border-radius: 8px; padding: 1rem;">
                             <strong style="display: block; color: var(--text-main); margin-bottom: 4px; font-size: 0.9rem;">🎓 Kesesuaian Prodi (Strict)</strong>
-                            <span style="font-size: 0.85rem;">Penguji harus berasal dari <strong>Prodi yang sama persis</strong> dengan mahasiswa. Lintas prodi tidak diperbolehkan dalam sistem ini.</span>
+                            <span style="font-size: 0.85rem;">Penguji harus berasal dari <strong>Prodi yang sama persis</strong> dengan mahasiswa. Lintas prodi tidak diperbolehkan.</span>
                         </div>
                         <!-- Constraint Item -->
                          <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 4px solid var(--success); border-radius: 8px; padding: 1rem;">
                             <strong style="display: block; color: var(--text-main); margin-bottom: 4px; font-size: 0.9rem;">📅 Prioritas Data "Libur"</strong>
-                            <span style="font-size: 0.85rem;">Jika dosen ditandai "Libur" (Merah) di menu Dosen, sistem akan 100% melewati mereka untuk slot tersebut.</span>
+                            <span style="font-size: 0.85rem;">Jika dosen mengisi data sibuk di menu Libur, sistem 100% menjamin mereka tidak akan diganggu di jam tersebut.</span>
                         </div>
                     </div>
                 </div>

@@ -15,9 +15,18 @@ import { isAuthenticated } from './services/auth.js';
 import './services/auth.js'; // Initialize auth handlers
 
 import { generateScheduleWithOptions } from './handlers/scheduleOptionsHandler.js';
+import { showLecturerSchedule } from './ui/components/DosenScheduleModal.js';
+import { showDetailedLecturerSchedule } from './ui/components/DosenDetailedScheduleModal.js';
 
 // Export to window for HTML access
-Object.assign(window, modals, actions, scheduleHandlers, { generateSchedule, navigate, getAllDosen, generateScheduleWithOptions });
+Object.assign(window, modals, actions, scheduleHandlers, {
+    generateSchedule,
+    navigate,
+    getAllDosen,
+    generateScheduleWithOptions,
+    showLecturerSchedule,
+    showDetailedLecturerSchedule
+});
 // Ensure new modal methods are available globally
 window.switchMahasiswaInputMode = modals.switchMahasiswaInputMode;
 window.handleMahasiswaCSVUpload = modals.handleMahasiswaCSVUpload;
@@ -33,6 +42,14 @@ window.exportScheduleToCSV = actions.exportScheduleToCSV;
 // Edit Mahasiswa (Generalized)
 window.openEditMahasiswa = modals.openEditMahasiswa;
 window.saveMahasiswa = modals.saveMahasiswa;
+// Manual Schedule
+window.toggleManualScheduleModal = modals.toggleManualScheduleModal;
+window.updateManualDosenOptions = modals.updateManualDosenOptions;
+window.submitManualSchedule = modals.submitManualSchedule;
+// Edit Examiners
+window.viewSlotDetails = modals.viewSlotDetails;
+window.toggleEditExaminersModal = modals.toggleEditExaminersModal;
+window.submitExaminersUpdate = modals.submitExaminersUpdate;
 
 async function initializeApp() {
     // Check authentication first
