@@ -2,7 +2,6 @@ import { settingsAPI, authAPI, logsAPI } from '../../services/api.js';
 import { ROOMS, DISABLED_ROOMS, TIMES, DATES, appState } from '../../data/store.js';
 import { showConfirm } from '../components/ConfirmationModal.js';
 import { LogicView } from './Logic.js';
-import { navigate } from '../core/router.js';
 
 export const SettingsView = () => {
     // Default tab state if not set
@@ -384,7 +383,7 @@ export const SettingsView = () => {
 // Handle tab switching
 window.switchSettingsTab = (tab) => {
     appState.settingsTab = tab;
-    navigate('settings');
+    window.navigate('settings');
 };
 
 window.clearLogs = async () => {
@@ -392,7 +391,7 @@ window.clearLogs = async () => {
     try {
         await logsAPI.clear();
         showToast('Log aktivitas berhasil dibersihkan', 'success');
-        navigate('settings'); // Refresh
+        window.navigate('settings'); // Refresh
     } catch (error) {
         showToast('Gagal membersihkan log: ' + error.message, 'error');
     }

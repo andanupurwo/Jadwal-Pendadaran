@@ -1,5 +1,5 @@
 import { APP_DATA, DATES, TIMES, ROOMS } from '../data/store.js';
-import { navigate } from '../ui/core/router.js';
+// removed import navigate
 import { scheduleAPI, slotsAPI } from '../services/api.js';
 import { showConfirm } from '../ui/components/ConfirmationModal.js';
 import { showSchedulingResult } from '../ui/components/SchedulingResultModal.js';
@@ -78,9 +78,9 @@ export async function generateSchedule(options = { silent: false }) {
                     });
 
                     if (result) {
-                        navigate('home');
+                        window.navigate('home');
                     } else {
-                        navigate(appState.currentView);
+                        window.navigate(appState.currentView);
                     }
                 }, 300);
             }

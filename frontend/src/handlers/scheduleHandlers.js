@@ -1,7 +1,7 @@
 import { APP_DATA } from '../data/store.js';
 import { generateSchedule } from '../logic/schedulingEngine.js';
-import { navigate } from '../ui/core/router.js';
 import { showConfirm } from '../ui/components/ConfirmationModal.js';
+import { scheduleAPI, slotsAPI } from '../services/api.js';
 
 /**
  * Schedule individual student by NIM
@@ -30,7 +30,7 @@ export async function scheduleIndividualStudent(nim) {
 
         // Refresh view to show updated status (stay on mahasiswa page)
         setTimeout(() => {
-            navigate('mahasiswa');
+            window.navigate('mahasiswa');
         }, 500);
 
     } catch (error) {

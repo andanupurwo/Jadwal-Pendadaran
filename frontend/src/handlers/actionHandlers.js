@@ -4,10 +4,9 @@ import { APP_DATA, appState, saveMahasiswaToStorage, saveLiburToStorage, saveExc
 
 // Fetch fresh data from server and use store logic for grouping
 await loadLiburFromAPI();
-import { INITIAL_LIBUR } from '../data/initialLibur.js';
+
 import * as views from '../ui/pages/index.js';
-import { navigate } from '../ui/core/router.js';
-import { getAllDosen } from '../utils/helpers.js';
+import { generateSchedule } from '../logic/schedulingEngine.js';
 import { showConfirm } from '../ui/components/ConfirmationModal.js';
 
 const getContainer = () => document.getElementById('main-content');
@@ -144,13 +143,7 @@ export async function wipeLiburData() {
 }
 
 
-export async function resetLiburData() {
-    if (await showConfirm('Reset data libur ke Default?')) {
-        APP_DATA.libur = [...INITIAL_LIBUR];
-        saveLiburToStorage();
-        refreshView('libur');
-    }
-}
+
 
 export async function deleteLiburGroup(idsString) {
     if (!idsString) return;
@@ -246,7 +239,7 @@ export function viewAndHighlightSchedule(studentName) {
     appState.selectedDate = slot.date;
 
     // 2. Navigasi ke Dashboard
-    navigate('home');
+    window.navigate('home');
 
     // 3. Cari elemen dan beri animasi (gunakan timeout agar render selesai dulu)
     setTimeout(() => {
@@ -479,56 +472,4 @@ export async function onDrop(e, date, time, room) {
     }
 }
 
-export async function runStressTest() {
-    if (!(await showConfirm('STRESS TEST akan menghapus data saat ini dan membuat 500 mahasiswa acak. Lanjutkan?', 'Warning: Stress Test'))) return;
 
-    // Pastikan kita bisa import helper di dalam fungsi ini atau pastikan dia global
-    const logEl = document.getElementById('logicLog');
-    if (logEl) logEl.innerHTML = '<div style="color:var(--warning);">[SYSTEM] Memulai Stress Test...</div>';
-
-    // Ambil data dosen
-    const allDosen = getAllDosen();
-    if (allDosen.length === 0) {
-        showToast('Data dosen kosong, tidak bisa melakukan stress test.', 'error');
-        return;
-    }
-
-    const prodis = [...new Set(allDosen.map(d => d.prodi))].filter(p => p);
-    const newMahasiswa = [];
-
-    for (let i = 1; i <= 500; i++) {
-        const prodi = prodis[Math.floor(Math.random() * prodis.length)];
-        const lecturersFromProdi = allDosen.filter(d => d.prodi === prodi);
-        const pembimbing = lecturersFromProdi.length > 0
-            ? lecturersFromProdi[Math.floor(Math.random() * lecturersFromProdi.length)].nama
-            : allDosen[Math.floor(Math.random() * allDosen.length)].nama;
-
-        newMahasiswa.push({
-            nim: `TEST.${22000 + i}`,
-            nama: `Student StressTest ${i}`,
-            prodi: prodi,
-            pembimbing: pembimbing
-        });
-    }
-
-    APP_DATA.mahasiswa = newMahasiswa;
-    APP_DATA.slots = [];
-    saveMahasiswaToStorage();
-
-    if (logEl) logEl.innerHTML += `<div style="color:var(--success);">[DATA] Berhasil membuat 500 mahasiswa simulasi.</div>`;
-
-    // 2. Run Engine & Measure Time
-    setTimeout(async () => {
-        const startTime = performance.now();
-        await window.generateSchedule({ silent: true });
-        const endTime = performance.now();
-
-        const duration = ((endTime - startTime) / 1000).toFixed(2);
-        if (logEl) {
-            logEl.innerHTML += `<div style="color:var(--primary); font-weight:800; margin-top:10px;">[STRESS TEST RESULT]</div>`;
-            logEl.innerHTML += `<div>Total Prosedur: 500 Mahasiswa</div>`;
-            logEl.innerHTML += `<div>Waktu Eksekusi: ${duration} detik</div>`;
-            logEl.innerHTML += `<div>Kecepatan Rata-rata: ${(500 / duration).toFixed(1)} mhs/detik</div>`;
-        }
-    }, 500);
-}

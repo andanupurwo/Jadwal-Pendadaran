@@ -24,7 +24,7 @@ function normalizeName(nama) {
  */
 function compareNames(name1, name2) {
     if (!name1 || !name2) return false;
-    
+
     // Normalize and split into words
     const normalize = (n) => {
         let base = n.split(',')[0]; // Take before comma (remove titles)
@@ -35,15 +35,15 @@ function compareNames(name1, name2) {
             .split(' ')
             .filter(w => w.length > 0); // Common words only
     };
-    
+
     const words1 = normalize(name1);
     const words2 = normalize(name2);
-    
+
     if (words1.length === 0 || words2.length === 0) return false;
-    
+
     // Count common words
     const commonWords = words1.filter(w => words2.includes(w));
-    
+
     // At least 2 words must match
     return commonWords.length >= 2;
 }
@@ -66,14 +66,7 @@ async function getAllDosen() {
 async function isDosenAvailable(namaDosen, date, time, allDosen, liburData, slotsData, excludeSlotStudent = null, ignoreGlobalExclude = false) {
     const dosenData = allDosen.find(d => compareNames(d.nama, namaDosen));
 
-    // DEBUG KHUSUS UNTUK AMIR
-    const searchNameNorm = normalizeName(namaDosen);
-    const isAmir = searchNameNorm.includes('amir');
-    if (isAmir) {
-        // console.log(`[DEBUG AMIR] Checking ${namaDosen} for ${date} ${time}`);
-        if (!dosenData) console.log(`[DEBUG AMIR] ⚠️ Dosen data NOT FOUND for ${namaDosen}`);
-        else console.log(`[DEBUG AMIR] Found NIK: ${dosenData.nik}`);
-    }
+    // AMIR Debug block removed
 
     if (!dosenData) {
         // console.warn(`[Availability] Data dosen tidak ditemukan untuk nama: ${namaDosen}`);
@@ -92,38 +85,31 @@ async function isDosenAvailable(namaDosen, date, time, allDosen, liburData, slot
             if (!compareNames(l.dosen_name || l.nama || "", namaDosen)) return false;
         }
 
-        // DEBUG AMIR
-        if (isAmir) {
-            console.log(`[DEBUG AMIR] Rule found: Date=${l.date}, Time=${l.time}. MatchId=${matchId}, MatchNama=${matchNama}`);
-        }
+
+
 
         // Condition A: Block specific date AND specific time
         if (l.date && l.time) {
             const hit = String(l.date) === String(date) && String(l.time) === String(time);
-            if (isAmir && hit) console.log(`[DEBUG AMIR] 🛑 BLOCKED by Condition A (Specific D&T)`);
             return hit;
         }
 
         // Condition B: Block specific date (all times)
         if (l.date && !l.time) {
             const hit = String(l.date) === String(date);
-            if (isAmir && hit) console.log(`[DEBUG AMIR] 🛑 BLOCKED by Condition B (Date Only)`);
             return hit;
         }
 
         // Condition C: Block specific time (all dates)
         if (!l.date && l.time) {
             const hit = l.time === time;
-            if (isAmir && hit) console.log(`[DEBUG AMIR] 🛑 BLOCKED by Condition C (Time Only, All Dates)`);
             return hit;
         }
 
         // Condition D: Block absolutely everything (no date, no time specified)
         if (!l.date && !l.time) {
-            if (isAmir) console.log(`[DEBUG AMIR] 🛑 BLOCKED by Condition D (Total Block)`);
             return true;
         }
-
         return false;
     });
 
@@ -145,7 +131,7 @@ async function isDosenAvailable(namaDosen, date, time, allDosen, liburData, slot
         // So checking slot.examiners IS enough.
 
         const isBusy = slot.examiners && slot.examiners.some(ex => compareNames(ex, namaDosen));
-        if (isAmir && isBusy) console.log(`[DEBUG AMIR] 📅 BUSY at ${slot.date} ${slot.time} with ${slot.student}`);
+        // if (isAmir && isBusy) console.log(`[DEBUG AMIR] 📅 BUSY at ${slot.date} ${slot.time} with ${slot.student}`);
         return isBusy;
     });
 
